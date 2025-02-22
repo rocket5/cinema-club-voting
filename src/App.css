@@ -2,3 +2,112 @@
 .container {
   padding: 20px;
 }
+
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* navbar */
+.navbar-brand {
+  font-weight: bold;
+}
+
+.nav-link {
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #fff !important;
+}
+
+/* movie card */
+.card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-img-top {
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  font-size: 0.9rem;
+}
+
+/* Movei List */
+
+.container {
+  padding: 20px 15px;
+}
+
+h2 {
+  color: #333;
+  font-weight: 600;
+}
+
+.g-4 {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 1.5rem;
+}
+
+/* Movie Details */
+
+.movie-detail-img {
+  max-height: 500px;
+  object-fit: cover;
+}
+
+.movie-detail h1 {
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.movie-detail h5 {
+  margin-top: 1.5rem;
+  font-weight: 600;
+}
+
+/* Add Movie */
+
+.needs-validation input:invalid,
+.needs-validation textarea:invalid {
+  border-color: #dc3545;
+}
+
+.needs-validation input:valid,
+.needs-validation textarea:valid {
+  border-color: #198754;
+}
+
+.form-label {
+  font-weight: 500;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+/* Vote button */
+
+.btn-outline-success:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}
