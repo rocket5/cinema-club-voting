@@ -9,18 +9,19 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div className="app">
         <Navbar />
-        <div className="container">
+        <main>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/add" element={<AddMovie />} />
             <Route path="/movie/:id" element={<MovieDetail />} />
           </Routes>
-        </div>
+        </main>
       </div>
     </Router>
   );
 }
 
 export default App;
+

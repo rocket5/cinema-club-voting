@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import VoteButton from '../components/VoteButton';
+import VoteButton from '../components/RankInput';
 
 function MovieDetail() {
   const { id } = useParams();

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import VoteButton from './VoteButton';
+import RankInput from './RankInput';
 
-function MovieCard({ movie }) {
+function MovieCard({ movie, totalMovies, onRankChange, currentRank }) {
   return (
     <div className="card h-100 shadow-sm">
       <img 
@@ -18,11 +18,16 @@ function MovieCard({ movie }) {
           {movie.description?.substring(0, 100)}
           {movie.description?.length > 100 ? '...' : ''}
         </p>
-        <div className="d-flex justify-content-between align-items-center mt-auto">
-          <VoteButton movieId={movie.id} votes={movie.votes} />
+        <div className="mt-auto">
+          <RankInput 
+            movieId={movie.id}
+            totalMovies={totalMovies}
+            currentRank={currentRank}
+            onRankChange={onRankChange}
+          />
           <Link 
             to={`/movie/${movie.id}`} 
-            className="btn btn-outline-primary"
+            className="btn btn-outline-primary mt-2 w-100"
           >
             View Details
           </Link>

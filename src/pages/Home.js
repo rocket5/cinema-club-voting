@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MovieList from '../components/MovieList';
 
 function Home() {
@@ -29,10 +29,73 @@ function Home() {
     }
   ]);
 
+  const [rankings, setRankings] = useState({});
+  const [isSorted, setIsSorted] = useState(false);
+
+  useEffect(() => {
+    const savedRankings = localStorage.getItem('movieRankings');
+    if (savedRankings) {
+      setRankings(JSON.parse(savedRankings));
+    }
+  }, []);
+
+  const handleRankChange = (movieId, rank) => {
+    setRankings(prevRankings => {
+      const updatedRankings = { ...prevRankings };
+      
+      if (rank === 0) {
+        delete updatedRankings[movieId];
+      } else {
+        Object.entries(updatedRankings).forEach(([key, value]) => {
+          if (value === rank) {
+            delete updatedRankings[key];
+          }
+        });
+        updatedRankings[movieId] = rank;
+      }
+      
+      localStorage.setItem('movieRankings', JSON.stringify(updatedRankings));
+      return updatedRankings;
+    });
+  };
+
+  const handleSort = () => {
+    setIsSorted(!isSorted);
+  };
+
+  // Get movies in correct order based on sort state
+  const getDisplayedMovies = () => {
+    if (!isSorted) return movies;
+
+    return [...movies].sort((a, b) => {
+      const rankA = rankings[a.id] || 0;
+      const rankB = rankings[b.id] || 0;
+      return rankB - rankA;
+    });
+  };
+
   return (
     <div className="container">
-      <h2 className="mb-4">Popular Movies</h2>
-      <MovieList movies={movies} />
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Rank Your Favorite Movies</h2>
+        <button 
+          className="btn btn-outline-primary"
+          onClick={handleSort}
+        >
+          {isSorted ? "Show Original Order" : "Sort by Rank"}
+        </button>
+      </div>
+      
+      <div className="alert alert-info mb-4">
+        Rank movies from 1 to {movies.length}, with {movies.length} being your favorite.
+      </div>
+      
+      <MovieList 
+        movies={getDisplayedMovies()}
+        totalMovies={movies.length}
+        rankings={rankings}
+        onRankChange={handleRankChange}
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import MovieCard from './MovieCard';
 
-function MovieList({ movies }) {
+function MovieList({ movies, totalMovies, rankings, onRankChange }) {
   if (!movies || movies.length === 0) {
     return (
       <div className="text-center py-5">
@@ -15,7 +15,12 @@ function MovieList({ movies }) {
     <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       {movies.map(movie => (
         <div key={movie.id} className="col">
-          <MovieCard movie={movie} />
+          <MovieCard 
+            movie={movie}
+            totalMovies={totalMovies}
+            currentRank={rankings[movie.id]}
+            onRankChange={onRankChange}
+          />
         </div>
       ))}
     </div>
