@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import AddMovie from './pages/AddMovie';
 import MovieDetail from './pages/MovieDetail';
+import Session from './pages/Session';
 import ProtectedHostRoute from './routes/ProtectedHostRoute';
 import { AppModeProvider } from './context/AppModeContext';
 import './App.css';
@@ -16,6 +17,8 @@ function App() {
           <Navbar />
           <main>
             <Routes>
+              <Route path="/session/:sessionId" element={<Session />} />
+              <Route path="/session/:sessionId/add" element={<AddMovie />} />
               <Route path="/" element={<Home />} />
               <Route 
                 path="/add" 

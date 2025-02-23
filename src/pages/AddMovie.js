@@ -1,73 +1,75 @@
 // src/pages/AddMovie.js
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import './AddMovie.css';
+import { useNavigate, useParams } from 'react-router-dom';
+import './AddMovie.css'; // Make sure this file exists
 
 function AddMovie() {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const { sessionId } = useParams();
-  const navigate = useNavigate();
+    const { sessionId } = useParams();
+    const navigate = useNavigate();
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [addedBy, setAddedBy] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      const response = await fetch('/.netlify/functions/addmovie', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          title,
-          description,
-          addedBy: 'User' // TODO: Replace with actual user info when authentication is added
-        }),
-      });
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch('/.netlify/functions/add-movie', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title,
+                    description,
+                    addedBy,
+                    sessionId
+                })
+            });
 
-      if (!response.ok) {
-        throw new Error('Failed to add movie');
-      }
+            if (!response.ok) {
+                throw new Error('Failed to add movie');
+            }
 
-      const result = await response.json();
-      console.log('Movie added:', result);
-      
-      // Navigate back to the session page
-      navigate(`/session/${sessionId}`);
-    } catch (error) {
-      console.error('Error adding movie:', error);
-      // TODO: Add proper error handling/user feedback
-    }
-  };
+            navigate(`/session/${sessionId}`);
+        } catch (error) {
+            console.error('Error adding movie:', error);
+        }
+    };
 
-  return (
-    <div className="add-movie-container">
-      <h2>Add a Movie</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">Movie Title:</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
+    return (
+        <div className="add-movie-container">
+            <h1>Add New Movie</h1>
+            <form onSubmit={handleSubmit} className="add-movie-form">
+                <div className="form-group">
+                    <label>Title:</label>
+                    <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                        className="form-input"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Description:</label>
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                        className="form-input"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Added By:</label>
+                    <input
+                        type="text"
+                        value={addedBy}
+                        onChange={(e) => setAddedBy(e.target.value)}
+                        required
+                        className="form-input"
+                    />
+                </div>
+                <button type="submit" className="submit-button">Add Movie</button>
+            </form>
         </div>
-        <div className="form-group">
-          <label htmlFor="description">Description:</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Add Movie</button>
-      </form>
-    </div>
-  );
+    );
 }
 
 export default AddMovie;

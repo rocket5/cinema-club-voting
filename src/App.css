@@ -185,3 +185,38 @@ main {
 .alert-info strong {
   font-weight: 600;
 }
+
+/* Add this to your CSS file */
+.session-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.add-movie-button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 20px 0;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.movies-list {
+  margin-top: 20px;
+}
+
+.movie-item {
+  border: 1px solid #ddd;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.movie-meta {
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  margin-top: 10px;
+}
