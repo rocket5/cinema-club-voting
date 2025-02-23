@@ -173,3 +173,15 @@ main {
   flex: 1;
   padding: 20px 0;
 }
+
+/* app modes */
+
+.mode-indicator .badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.alert-warning strong,
+.alert-info strong {
+  font-weight: 600;
+}

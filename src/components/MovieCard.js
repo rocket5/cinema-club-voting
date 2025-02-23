@@ -1,8 +1,16 @@
+// src/components/MovieCard.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 import RankInput from './RankInput';
 
-function MovieCard({ movie, totalMovies, onRankChange, currentRank }) {
+function MovieCard({ 
+  movie, 
+  totalMovies, 
+  currentRank, 
+  onRankChange, 
+  isHostMode,
+  onDelete 
+}) {
   return (
     <div className="card h-100 shadow-sm">
       <img 
@@ -19,18 +27,37 @@ function MovieCard({ movie, totalMovies, onRankChange, currentRank }) {
           {movie.description?.length > 100 ? '...' : ''}
         </p>
         <div className="mt-auto">
-          <RankInput 
-            movieId={movie.id}
-            totalMovies={totalMovies}
-            currentRank={currentRank}
-            onRankChange={onRankChange}
-          />
-          <Link 
-            to={`/movie/${movie.id}`} 
-            className="btn btn-outline-primary mt-2 w-100"
-          >
-            View Details
-          </Link>
+          {isHostMode ? (
+            <div className="d-flex gap-2">
+              <Link 
+                to={`/movie/${movie.id}`} 
+                className="btn btn-outline-primary flex-grow-1"
+              >
+                Edit
+              </Link>
+              <button 
+                onClick={() => onDelete?.(movie.id)} 
+                className="btn btn-outline-danger"
+              >
+                Delete
+              </button>
+            </div>
+          ) : (
+            <>
+              <RankInput 
+                movieId={movie.id}
+                totalMovies={totalMovies}
+                currentRank={currentRank}
+                onRankChange={onRankChange}
+              />
+              <Link 
+                to={`/movie/${movie.id}`} 
+                className="btn btn-outline-primary mt-2 w-100"
+              >
+                View Details
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

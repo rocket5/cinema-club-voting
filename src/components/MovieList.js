@@ -1,12 +1,24 @@
+// src/components/MovieList.js
 import React from 'react';
 import MovieCard from './MovieCard';
 
-function MovieList({ movies, totalMovies, rankings, onRankChange }) {
+function MovieList({ 
+  movies, 
+  totalMovies, 
+  rankings, 
+  onRankChange, 
+  isHostMode, 
+  onDelete 
+}) {
   if (!movies || movies.length === 0) {
     return (
       <div className="text-center py-5">
         <h3>No movies found</h3>
-        <p className="text-muted">Be the first to add a movie!</p>
+        <p className="text-muted">
+          {isHostMode 
+            ? "Add some movies for the next voting session!" 
+            : "No movies available for voting yet."}
+        </p>
       </div>
     );
   }
@@ -18,8 +30,10 @@ function MovieList({ movies, totalMovies, rankings, onRankChange }) {
           <MovieCard 
             movie={movie}
             totalMovies={totalMovies}
-            currentRank={rankings[movie.id]}
+            currentRank={rankings ? rankings[movie.id] : undefined}
             onRankChange={onRankChange}
+            isHostMode={isHostMode}
+            onDelete={onDelete}
           />
         </div>
       ))}

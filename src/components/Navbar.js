@@ -1,8 +1,19 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAppMode } from '../context/AppModeContext';
 
 function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isHostMode, toggleMode } = useAppMode();
+
+  const handleModeSwitch = () => {
+    if (!isHostMode) {
+      // If switching to host mode, navigate to home
+      navigate('/');
+    }
+    toggleMode();
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -10,7 +21,7 @@ function Navbar() {
         <Link className="navbar-brand" to="/">
           🎬 Movie Ranker
         </Link>
-        
+
         <button 
           className="navbar-toggler" 
           type="button" 
@@ -19,7 +30,7 @@ function Navbar() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        
+
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
@@ -27,26 +38,33 @@ function Navbar() {
                 className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
                 to="/"
               >
-                Home
+                {isHostMode ? 'Manage Movies' : 'Vote'}
               </Link>
             </li>
-            <li className="nav-item">
-              <Link 
-                className={`nav-link ${location.pathname === '/add' ? 'active' : ''}`}
-                to="/add"
-              >
-                Add Movie
-              </Link>
-            </li>
+            {isHostMode && (
+              <li className="nav-item">
+                <Link 
+                  className={`nav-link ${location.pathname === '/add' ? 'active' : ''}`}
+                  to="/add"
+                >
+                  Add Movie
+                </Link>
+              </li>
+            )}
           </ul>
-          
-          <div className="d-flex">
-            <Link 
-              to="/add" 
+
+          <div className="d-flex align-items-center">
+            <div className="mode-indicator me-3">
+              <span className={`badge ${isHostMode ? 'bg-warning' : 'bg-success'}`}>
+                {isHostMode ? 'Host Mode' : 'Voting Mode'}
+              </span>
+            </div>
+            <button 
               className="btn btn-outline-light"
+              onClick={handleModeSwitch}
             >
-              + Add New Movie
-            </Link>
+              Switch to {isHostMode ? 'Voting' : 'Host'} Mode
+            </button>
           </div>
         </div>
       </div>

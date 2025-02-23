@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import MovieList from '../components/MovieList';
+import { useAppMode } from '../context/AppModeContext';
 
 function Home() {
-  const [movies] = useState([
+  // Sample initial movies - in a real app, this would come from an API or database
+  const [movies, setMovies] = useState([
     {
       id: 1,
       title: "The Shawshank Redemption",
@@ -31,7 +34,9 @@ function Home() {
 
   const [rankings, setRankings] = useState({});
   const [isSorted, setIsSorted] = useState(false);
+  const { isHostMode } = useAppMode();
 
+  // Load rankings from localStorage on component mount
   useEffect(() => {
     const savedRankings = localStorage.getItem('movieRankings');
     if (savedRankings) {
@@ -46,14 +51,17 @@ function Home() {
       if (rank === 0) {
         delete updatedRankings[movieId];
       } else {
+        // Remove the rank from any movie that currently has it
         Object.entries(updatedRankings).forEach(([key, value]) => {
           if (value === rank) {
             delete updatedRankings[key];
           }
         });
+        // Assign the new rank
         updatedRankings[movieId] = rank;
       }
       
+      // Save to localStorage
       localStorage.setItem('movieRankings', JSON.stringify(updatedRankings));
       return updatedRankings;
     });
@@ -63,7 +71,22 @@ function Home() {
     setIsSorted(!isSorted);
   };
 
-  // Get movies in correct order based on sort state
+  const handleDeleteMovie = (movieId) => {
+    setMovies(prevMovies => {
+      const updatedMovies = prevMovies.filter(movie => movie.id !== movieId);
+      // You might want to save to localStorage or make an API call here
+      return updatedMovies;
+    });
+
+    // Also remove any rankings for this movie
+    setRankings(prevRankings => {
+      const updatedRankings = { ...prevRankings };
+      delete updatedRankings[movieId];
+      localStorage.setItem('movieRankings', JSON.stringify(updatedRankings));
+      return updatedRankings;
+    });
+  };
+
   const getDisplayedMovies = () => {
     if (!isSorted) return movies;
 
@@ -76,26 +99,48 @@ function Home() {
 
   return (
     <div className="container">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Rank Your Favorite Movies</h2>
-        <button 
-          className="btn btn-outline-primary"
-          onClick={handleSort}
-        >
-          {isSorted ? "Show Original Order" : "Sort by Rank"}
-        </button>
-      </div>
-      
-      <div className="alert alert-info mb-4">
-        Rank movies from 1 to {movies.length}, with {movies.length} being your favorite.
-      </div>
-      
-      <MovieList 
-        movies={getDisplayedMovies()}
-        totalMovies={movies.length}
-        rankings={rankings}
-        onRankChange={handleRankChange}
-      />
+      {isHostMode ? (
+        <>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2>Manage Movies</h2>
+            <Link to="/add" className="btn btn-primary">
+              + Add New Movie
+            </Link>
+          </div>
+          <div className="alert alert-warning mb-4">
+            <strong>Host Mode:</strong> Add or remove movies for the next voting session.
+          </div>
+          <MovieList 
+            movies={movies}
+            isHostMode={true}
+            onDelete={handleDeleteMovie}
+          />
+        </>
+      ) : (
+        <>
+          <h2 className="mb-4">Rank This Week's Movies</h2>
+          <div className="alert alert-info mb-4">
+            Rank movies from 1 to {movies.length}, with {movies.length} being your favorite.
+          </div>
+          <MovieList 
+            movies={getDisplayedMovies()}
+            totalMovies={movies.length}
+            rankings={rankings}
+            onRankChange={handleRankChange}
+            isHostMode={false}
+          />
+          {movies.length > 0 && (
+            <div className="text-center mt-4">
+              <button 
+                className="btn btn-outline-primary"
+                onClick={handleSort}
+              >
+                {isSorted ? "Show Original Order" : "Sort by Rank"}
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
