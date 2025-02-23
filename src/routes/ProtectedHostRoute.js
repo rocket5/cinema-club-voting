@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppMode } from '../context/AppModeContext';
+import { Navigate } from 'react-router-dom';
 
 function ProtectedHostRoute({ children }) {
   const { isHostMode } = useAppMode();

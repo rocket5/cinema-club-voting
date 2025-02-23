@@ -1,0 +1,24 @@
+type Session {
+  startDate: String!
+  endDate: String
+  hostId: String!
+  status: String!
+  winningMovie: String
+}
+
+type Movie {
+  sessionId: ID!
+  title: String!
+  description: String
+  imageUrl: String
+  addedBy: String!
+  addedAt: String!
+}
+
+type Vote {
+  sessionId: ID!
+  movieId: ID!
+  userId: String!
+  rank: Int!
+  votedAt: String!
+}

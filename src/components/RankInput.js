@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 function RankInput({ movieId, totalMovies, currentRank, onRankChange }) {
   // Remove local state and use currentRank directly from props

@@ -1,169 +1,70 @@
+// src/pages/AddMovie.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import './AddMovie.css';
 
 function AddMovie() {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const { sessionId } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: '',
-    releaseYear: '',
-    description: '',
-    imageUrl: '',
-    director: '',
-    genre: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-
-    // Basic validation
-    if (!formData.title || !formData.releaseYear || !formData.description) {
-      setError('Please fill in all required fields');
-      setIsSubmitting(false);
-      return;
-    }
-
+    
     try {
-      // For now, we'll just console.log the data
-      // Later, we'll implement the API call
-      console.log('Submitting movie:', formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Reset form and redirect
-      setFormData({
-        title: '',
-        releaseYear: '',
-        description: '',
-        imageUrl: '',
-        director: '',
-        genre: ''
+      const response = await fetch('/.netlify/functions/addmovie', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          title,
+          description,
+          addedBy: 'User' // TODO: Replace with actual user info when authentication is added
+        }),
       });
-      navigate('/');
-    } catch (err) {
-      setError('Failed to add movie. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+
+      if (!response.ok) {
+        throw new Error('Failed to add movie');
+      }
+
+      const result = await response.json();
+      console.log('Movie added:', result);
+      
+      // Navigate back to the session page
+      navigate(`/session/${sessionId}`);
+    } catch (error) {
+      console.error('Error adding movie:', error);
+      // TODO: Add proper error handling/user feedback
     }
   };
 
   return (
-    <div className="container py-4">
-      <h2 className="mb-4">Add New Movie</h2>
-      
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="needs-validation">
-        <div className="mb-3">
-          <label htmlFor="title" className="form-label">Title *</label>
+    <div className="add-movie-container">
+      <h2>Add a Movie</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="title">Movie Title:</label>
           <input
             type="text"
-            className="form-control"
             id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             required
           />
         </div>
-
-        <div className="mb-3">
-          <label htmlFor="releaseYear" className="form-label">Release Year *</label>
-          <input
-            type="number"
-            className="form-control"
-            id="releaseYear"
-            name="releaseYear"
-            value={formData.releaseYear}
-            onChange={handleChange}
-            min="1888"
-            max={new Date().getFullYear()}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="description" className="form-label">Description *</label>
+        <div className="form-group">
+          <label htmlFor="description">Description:</label>
           <textarea
-            className="form-control"
             id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows="3"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             required
           />
         </div>
-
-        <div className="mb-3">
-          <label htmlFor="imageUrl" className="form-label">Image URL</label>
-          <input
-            type="url"
-            className="form-control"
-            id="imageUrl"
-            name="imageUrl"
-            value={formData.imageUrl}
-            onChange={handleChange}
-            placeholder="https://example.com/movie-image.jpg"
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="director" className="form-label">Director</label>
-          <input
-            type="text"
-            className="form-control"
-            id="director"
-            name="director"
-            value={formData.director}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="genre" className="form-label">Genre</label>
-          <input
-            type="text"
-            className="form-control"
-            id="genre"
-            name="genre"
-            value={formData.genre}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="d-flex gap-2">
-          <button 
-            type="submit" 
-            className="btn btn-primary"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Adding Movie...' : 'Add Movie'}
-          </button>
-          <button 
-            type="button" 
-            className="btn btn-outline-secondary"
-            onClick={() => navigate('/')}
-          >
-            Cancel
-          </button>
-        </div>
+        <button type="submit">Add Movie</button>
       </form>
     </div>
   );
