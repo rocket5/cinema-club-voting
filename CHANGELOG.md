@@ -49,6 +49,7 @@ All notable changes to this project will be documented in this file.
 - Added getMovie function to the frontend API for fetching individual movies
 - Added deleteAllMovies function to the frontend API for bulk deletion
 - Added getSessionMovies function to the frontend API for fetching session-specific movies
+- Added test-update-movie.js script for debugging movie update functionality
 
 ### Changed
 - Updated session lists to sort by date with newest sessions appearing first
@@ -144,6 +145,7 @@ All notable changes to this project will be documented in this file.
 - Fixed potential null reference errors in database operations
 - Fixed error handling in bulk deletion operations
 - Fixed inconsistent response formats across functions
+- Fixed updateMovie function in FaunaDB library by adding null-check operator to prevent errors when documents don't exist
 
 ### Removed
 - Removed monolithic movies.js Netlify function in favor of dedicated functions for each operation

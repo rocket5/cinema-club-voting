@@ -111,7 +111,7 @@ const updateMovie = async (id, movieData) => {
     
     const result = await client.query(fql`
       let movie = movies.byId(${id})
-      movie.update(${data})
+      movie!.update(${data})
     `);
     
     return result.data;
