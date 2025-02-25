@@ -10,6 +10,7 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Session creation is restricted to Host mode for administrative control
 - The application has a well-structured component system with reusable components like MovieList and MovieCard
 - Debug tools are implemented as a collapsible panel component and restricted to Host mode for safety
+- The application uses a mode-based architecture to control which features are available to hosts vs. voters
 
 ## Technical Implementation Details
 
@@ -19,6 +20,7 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Netlify Functions are used to create a serverless backend API
 - The voting functionality is implemented using a ranking system with the RankInput component
 - Bulk database operations are implemented through dedicated Netlify serverless functions
+- The same SessionsList component is used for both host and voter modes, with conditional rendering based on isHostMode prop
 
 ## Recent Learnings
 
@@ -28,6 +30,9 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Try-catch blocks should be used when formatting dates to prevent rendering errors
 - FaunaDB query response structure may vary (data can be directly an array or nested within data.data)
 - It's safer to parse API responses as text first, then attempt JSON parsing in a try-catch block
+- The application follows a pattern of conditionally rendering UI elements based on the current app mode
+- Components can be easily extended to support multiple modes by passing appropriate props and using conditional rendering
+- The same endpoint for fetching sessions can be reused in both Host and Vote modes
 - Raw logging of response objects is essential for debugging FaunaDB integration issues
 - Defensive coding is necessary when working with external APIs - never assume field existence
 - Two-stage error handling (both in API function and UI components) creates a more resilient application

@@ -13,16 +13,10 @@ function Home() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Fetch sessions only in Vote mode
+    // Fetch sessions in both Host and Vote mode
     useEffect(() => {
-        if (!isHostMode) {
-            fetchSessions();
-        } else {
-            // Reset state when switching to Host mode
-            setSessions([]);
-            setError(null);
-        }
-    }, [isHostMode]);
+        fetchSessions();
+    }, []);
 
     const fetchSessions = async () => {
         setLoading(true);
@@ -97,32 +91,32 @@ function Home() {
                 <h1>Welcome to Cinema Club Voting</h1>
                 <p>
                     {isHostMode 
-                        ? "You're in Host mode. Create a new voting session to get started." 
+                        ? "You're in Host mode. Create a new voting session or manage existing ones." 
                         : "You're in Vote mode. Join an existing session to vote on movies."}
                 </p>
             </div>
 
-            {isHostMode ? (
+            {isHostMode && (
                 <button onClick={createSession} className="create-session-btn">
                     Create New Session
                 </button>
-            ) : (
-                <>
-                    {error && (
-                        <div className="error-container">
-                            <p>{error}</p>
-                            <button onClick={handleRetry} className="retry-btn">
-                                Retry
-                            </button>
-                        </div>
-                    )}
-                    <SessionsList 
-                        sessions={sessions} 
-                        loading={loading} 
-                        error={error} 
-                    />
-                </>
             )}
+
+            {error && (
+                <div className="error-container">
+                    <p>{error}</p>
+                    <button onClick={handleRetry} className="retry-btn">
+                        Retry
+                    </button>
+                </div>
+            )}
+            
+            <SessionsList 
+                sessions={sessions} 
+                loading={loading} 
+                error={error}
+                isHostMode={isHostMode} 
+            />
             
             {/* Only show debug panel in Host mode */}
             {isHostMode && <DebugPanel />}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function SessionsList({ sessions, loading, error }) {
+function SessionsList({ sessions, loading, error, isHostMode }) {
     const navigate = useNavigate();
     
     if (loading) {
@@ -129,7 +129,7 @@ function SessionsList({ sessions, loading, error }) {
     
     return (
         <div className="sessions-list">
-            <h2>Available Sessions</h2>
+            <h2>{isHostMode ? 'Manage Sessions' : 'Available Sessions'}</h2>
             {sessions.map(session => {
                 // Skip rendering if session is invalid
                 if (!session || !session.id) {
@@ -154,6 +154,11 @@ function SessionsList({ sessions, loading, error }) {
                         <span className={`session-status status-${session.status || 'active'}`}>
                             {session.status || 'active'}
                         </span>
+                        {isHostMode && (
+                            <div className="session-host-actions">
+                                <span className="manage-session-label">Manage Movies</span>
+                            </div>
+                        )}
                     </div>
                 );
             })}

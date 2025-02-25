@@ -14,6 +14,8 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Added better error handling and user feedback
 - Added movie ranking functionality in Vote mode
 - Added debug panel with bulk delete functions for movies and sessions (Host mode only)
+- Added ability for hosts to see and manage all existing sessions
+- Added visual indicator for manageable sessions in Host mode
 
 ### Changed
 - Home page now conditionally renders based on current app mode
@@ -24,6 +26,9 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Improved Session page UI with proper Bootstrap styling
 - Enhanced bulk deletion operations with better error handling and debugging
 - Completely redesigned FaunaDB deletion approach with multiple fallback methods
+- Modified Home page to fetch and display sessions in both Host and Vote modes
+- Updated SessionsList component to support both Host and Vote mode interfaces
+- Restricted "Create New Session" button to only be visible in Host mode
 
 ### Fixed
 - Fixed date formatting issue in SessionsList component that was causing "Invalid time value" error
