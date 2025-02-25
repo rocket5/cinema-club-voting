@@ -1,10 +1,6 @@
 // netlify/functions/add-movie.js
 require('dotenv').config();
-const { Client, fql } = require('fauna');
-
-const client = new Client({
-    secret: process.env.FAUNA_SECRET_KEY,
-});
+const { createMovie } = require('../../src/lib/fauna/movies');
 
 exports.handler = async (event, context) => {
     console.log('Function add-movie started');
@@ -40,16 +36,15 @@ exports.handler = async (event, context) => {
             };
         }
 
-        console.log('Attempting to connect to Fauna DB...');
+        console.log('Preparing movie data...');
 
         // Build the movie object with all available fields
         const movieData = {
-            sessionId: sessionId,
-            title: title,
-            description: description,
-            addedBy: addedBy,
-            votes: 0,
-            createdAt: fql`Time.now()`
+            sessionId,
+            title,
+            description,
+            addedBy,
+            votes: 0
         };
 
         // Add optional fields if they exist
@@ -59,9 +54,8 @@ exports.handler = async (event, context) => {
         if (genre) movieData.genre = genre;
         if (imdbRating) movieData.imdbRating = imdbRating;
 
-        const result = await client.query(fql`
-            movies.create(${movieData})
-        `);
+        // Use the createMovie function from our FaunaDB library
+        const result = await createMovie(movieData);
 
         console.log('Movie created:', result);
 
@@ -70,20 +64,13 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 message: 'Movie added successfully',
                 movie: {
-                    id: result.data.id,
-                    title: title,
-                    description: description,
-                    addedBy: addedBy,
-                    poster: poster,
-                    year: year,
-                    director: director,
-                    genre: genre,
-                    imdbRating: imdbRating
+                    id: result.id,
+                    ...movieData
                 }
             })
         };
     } catch (error) {
-        console.error('Detailed error:', error);
+        console.error('Error adding movie:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({ 

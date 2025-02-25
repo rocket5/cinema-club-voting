@@ -1,9 +1,5 @@
 require('dotenv').config();
-const { Client, fql } = require('fauna');
-
-const client = new Client({
-  secret: process.env.FAUNA_SECRET_KEY,
-});
+const { getSessionById } = require('../../src/lib/fauna/sessions');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -41,22 +37,24 @@ exports.handler = async (event) => {
       };
     }
 
-    const result = await client.query(fql`
-      sessions.byId(${sessionId})
-    `);
+    // Use the getSessionById function from our FaunaDB library
+    const session = await getSessionById(sessionId);
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(result.data)
+      body: JSON.stringify(session)
     };
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error retrieving session:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to retrieve session' })
+      body: JSON.stringify({ 
+        error: 'Failed to retrieve session',
+        message: error.message 
+      })
     };
   }
 };

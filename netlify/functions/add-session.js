@@ -1,9 +1,5 @@
 require('dotenv').config();
-const { Client, fql } = require('fauna');
-
-const client = new Client({
-  secret: process.env.FAUNA_SECRET_KEY,
-});
+const { createSession } = require('../../src/lib/fauna/sessions');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -42,30 +38,36 @@ exports.handler = async (event) => {
       };
     }
 
-    const result = await client.query(fql`
-      sessions.create({
-        sessionName: ${sessionName},
-        createdBy: ${createdBy},
-        createdAt: Time.now()
-      })
-    `);
+    // Prepare session data
+    const sessionData = {
+      sessionName: sessionName,
+      hostId: createdBy,
+      status: 'active',
+      startDate: new Date().toISOString()
+    };
+
+    // Use the createSession function from our FaunaDB library
+    const result = await createSession(sessionData);
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         message: 'Session created successfully',
-        sessionId: result.data.id,
-        sessionName: result.data.sessionName
+        sessionId: result.id,
+        sessionName: result.sessionName
       })
     };
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error creating session:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to create session' })
+      body: JSON.stringify({ 
+        error: 'Failed to create session',
+        message: error.message
+      })
     };
   }
 };

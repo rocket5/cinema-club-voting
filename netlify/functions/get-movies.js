@@ -1,9 +1,5 @@
 require('dotenv').config();
-const { Client, fql } = require('fauna');
-
-const client = new Client({
-  secret: process.env.FAUNA_SECRET_KEY,
-});
+const { getMovies } = require('../../src/lib/fauna/movies');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -42,25 +38,27 @@ exports.handler = async (event) => {
       };
     }
 
-    const result = await client.query(fql`
-      movies.where(.sessionId == ${sessionId})
-    `);
+    // Use the getMovies function from our FaunaDB library
+    const movies = await getMovies(sessionId);
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        movies: result.data,
-        count: result.data.length
+        movies: movies,
+        count: movies.length
       })
     };
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error retrieving movies:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to retrieve movies' })
+      body: JSON.stringify({ 
+        error: 'Failed to retrieve movies',
+        message: error.message
+      })
     };
   }
 };

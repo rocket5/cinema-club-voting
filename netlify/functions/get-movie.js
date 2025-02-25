@@ -1,9 +1,5 @@
 require('dotenv').config();
-const { Client, fql } = require('fauna');
-
-const client = new Client({
-    secret: process.env.FAUNA_SECRET_KEY,
-});
+const { getMovieById } = require('../../src/lib/fauna/movies');
 
 exports.handler = async (event, context) => {
     console.log('Function get-movie started');
@@ -27,36 +23,27 @@ exports.handler = async (event, context) => {
 
         console.log('Fetching movie with ID:', id);
 
-        // Try to get the movie by ID
-        const result = await client.query(fql`
-            let movie = movies.byId(${id})
-            movie
-        `);
+        // Use the getMovieById function from our FaunaDB library
+        const movie = await getMovieById(id);
 
-        console.log('Movie fetch result:', result);
+        console.log('Movie fetched:', movie);
 
-        if (!result) {
+        if (!movie) {
             return {
                 statusCode: 404,
                 body: JSON.stringify({ message: 'Movie not found' })
             };
         }
 
-        // Extract the movie data
-        const movieData = {
-            id: result.id,
-            ...result.data
-        };
-
         return {
             statusCode: 200,
             body: JSON.stringify({
                 message: 'Movie fetched successfully',
-                movie: movieData
+                movie: movie
             })
         };
     } catch (error) {
-        console.error('Detailed error:', error);
+        console.error('Error fetching movie:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({ 

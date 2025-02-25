@@ -1,10 +1,6 @@
 // netlify/functions/create-session.js
 require('dotenv').config();
-const { Client, fql } = require('fauna');
-
-const client = new Client({
-    secret: process.env.FAUNA_SECRET_KEY,
-});
+const { createSession } = require('../../src/lib/fauna/sessions');
 
 exports.handler = async (event, context) => {
     try {
@@ -21,14 +17,16 @@ exports.handler = async (event, context) => {
             };
         }
 
-        const result = await client.query(fql`
-            sessions.create({
-                sessionName: ${sessionName},
-                createdBy: ${createdBy || 'host'},
-                createdAt: Time.now(),
-                status: "active"
-            })
-        `);
+        // Prepare session data
+        const sessionData = {
+            sessionName: sessionName,
+            hostId: createdBy || 'host',
+            status: 'active',
+            startDate: new Date().toISOString() // Add current date as startDate
+        };
+
+        // Use the createSession function from our FaunaDB library
+        const result = await createSession(sessionData);
 
         console.log('Session creation result:', result);
 
@@ -36,8 +34,8 @@ exports.handler = async (event, context) => {
             statusCode: 200,
             body: JSON.stringify({
                 message: 'Session created successfully',
-                sessionId: result.data.id,  // Using data.id instead of just id
-                sessionName: result.data.sessionName
+                sessionId: result.id,
+                sessionName: result.sessionName
             })
         };
     } catch (error) {

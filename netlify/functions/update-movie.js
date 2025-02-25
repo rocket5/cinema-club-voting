@@ -1,9 +1,5 @@
 require('dotenv').config();
-const { Client, fql } = require('fauna');
-
-const client = new Client({
-    secret: process.env.FAUNA_SECRET_KEY,
-});
+const { updateMovie } = require('../../src/lib/fauna/movies');
 
 exports.handler = async (event, context) => {
     console.log('Function update-movie started');
@@ -55,113 +51,23 @@ exports.handler = async (event, context) => {
         if (genre) movieData.genre = genre;
         if (imdbRating) movieData.imdbRating = imdbRating;
         
-        // Add updatedAt timestamp
-        movieData.updatedAt = new Date().toISOString();
+        // Use the updateMovie function from our FaunaDB library
+        const result = await updateMovie(id, movieData);
+        
+        console.log('Movie updated successfully:', result);
 
-        console.log('Movie data to update:', movieData);
-
-        // Simpler approach using Document.update
-        try {
-            const result = await client.query(
-                fql`
-                    let doc = movies.byId(${id})
-                    doc.update({
-                        data: ${movieData}
-                    })
-                `
-            );
-
-            console.log('Movie updated successfully:', result);
-
-            return {
-                statusCode: 200,
-                body: JSON.stringify({
-                    message: 'Movie updated successfully',
-                    movie: {
-                        id: id,
-                        ...movieData
-                    }
-                })
-            };
-        } catch (error) {
-            console.error('Error updating movie:', error);
-            
-            // Try an alternative approach if the first one fails
-            try {
-                console.log('Trying alternative update approach...');
-                
-                // Get the document first
-                const getResult = await client.query(
-                    fql`movies.byId(${id})`
-                );
-                
-                console.log('Retrieved movie:', getResult);
-                
-                if (!getResult) {
-                    return {
-                        statusCode: 404,
-                        body: JSON.stringify({ message: 'Movie not found' })
-                    };
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: 'Movie updated successfully',
+                movie: {
+                    id: id,
+                    ...movieData
                 }
-                
-                // Update using a different syntax
-                const updateResult = await client.query(
-                    fql`
-                        movies.update(${id}, {
-                            data: ${movieData}
-                        })
-                    `
-                );
-                
-                console.log('Movie updated with alternative approach:', updateResult);
-                
-                return {
-                    statusCode: 200,
-                    body: JSON.stringify({
-                        message: 'Movie updated successfully',
-                        movie: {
-                            id: id,
-                            ...movieData
-                        }
-                    })
-                };
-            } catch (altError) {
-                console.error('Error with alternative update approach:', altError);
-                
-                // One last attempt with a different ID format
-                try {
-                    console.log('Trying numeric ID approach...');
-                    const numericId = parseInt(id, 10);
-                    
-                    const finalResult = await client.query(
-                        fql`
-                            let doc = movies.byId(${numericId})
-                            doc.update({
-                                data: ${movieData}
-                            })
-                        `
-                    );
-                    
-                    console.log('Movie updated with numeric ID:', finalResult);
-                    
-                    return {
-                        statusCode: 200,
-                        body: JSON.stringify({
-                            message: 'Movie updated successfully',
-                            movie: {
-                                id: id,
-                                ...movieData
-                            }
-                        })
-                    };
-                } catch (finalError) {
-                    console.error('All update attempts failed:', finalError);
-                    throw new Error(`Failed to update movie after multiple attempts: ${finalError.message}`);
-                }
-            }
-        }
+            })
+        };
     } catch (error) {
-        console.error('Detailed error:', error);
+        console.error('Error updating movie:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({ 

@@ -1,10 +1,6 @@
 // netlify/functions/get-session-movies.js
 require('dotenv').config();
-const { Client, fql } = require('fauna');
-
-const client = new Client({
-    secret: process.env.FAUNA_SECRET_KEY,
-});
+const { getMovies } = require('../../src/lib/fauna/movies');
 
 exports.handler = async (event, context) => {
     const sessionId = event.queryStringParameters.sessionId;
@@ -18,27 +14,30 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const result = await client.query(fql`
-            movies.where(.sessionId == ${sessionId})
-        `);
-
-        console.log('Raw Fauna result:', result);
+        // Use the getMovies function from our FaunaDB library with sessionId filter
+        const movies = await getMovies(sessionId);
         
-        // Extract the actual movie documents from the Page
-        const moviesArray = result.data.data.map(doc => ({
-            id: doc.id,
-            title: doc.title,
-            description: doc.description,
-            addedBy: doc.addedBy,
-            votes: doc.votes || 0,
-            sessionId: doc.sessionId,
-            // Include OMDB fields if they exist
-            poster: doc.poster || null,
-            year: doc.year || null,
-            director: doc.director || null,
-            genre: doc.genre || null,
-            imdbRating: doc.imdbRating || null
-        }));
+        console.log('Movies retrieved:', movies);
+        console.log('Movies type:', typeof movies);
+        console.log('Is array:', Array.isArray(movies));
+
+        // Ensure movies is an array before mapping
+        const moviesArray = Array.isArray(movies) 
+            ? movies.map(doc => ({
+                id: doc.id,
+                title: doc.title,
+                description: doc.description,
+                addedBy: doc.addedBy,
+                votes: doc.votes || 0,
+                sessionId: doc.sessionId,
+                // Include OMDB fields if they exist
+                poster: doc.poster || null,
+                year: doc.year || null,
+                director: doc.director || null,
+                genre: doc.genre || null,
+                imdbRating: doc.imdbRating || null
+              }))
+            : [];
 
         console.log('Processed movies array:', moviesArray);
 
@@ -49,7 +48,7 @@ exports.handler = async (event, context) => {
             })
         };
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching movies:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({ 

@@ -36,6 +36,19 @@ All notable changes to this project will be documented in this file.
 - Added retry functionality for movie detail loading errors
 - Added delete-movie serverless function with multiple fallback strategies for reliable movie deletion
 - Added comprehensive logging for delete operations to facilitate debugging
+- Added deleteAllMovies function to the FaunaDB movies library for bulk deletion
+- Added deleteAllSessions function to the FaunaDB sessions library for bulk deletion
+- Added FaunaDB library for centralized database operations
+- Added movies.js module in FaunaDB library for movie-related operations
+- Added sessions.js module in FaunaDB library for session-related operations
+- Added votes.js module in FaunaDB library for vote-related operations
+- Added helper functions for consistent data handling across all database operations
+- Added bulk deletion operations to the FaunaDB library
+- Added consistent error handling patterns across all database operations
+- Added detailed result reporting for bulk operations
+- Added getMovie function to the frontend API for fetching individual movies
+- Added deleteAllMovies function to the frontend API for bulk deletion
+- Added getSessionMovies function to the frontend API for fetching session-specific movies
 
 ### Changed
 - Updated session lists to sort by date with newest sessions appearing first
@@ -62,6 +75,34 @@ All notable changes to this project will be documented in this file.
 - Updated AddMovie component to support both adding and editing movies
 - Improved MovieDetail component with better error handling and data display
 - Enhanced movie detail view with proper fallbacks for missing data
+- Refactored Netlify functions to use the new FaunaDB library
+  - Refactored delete-movie.js to use the deleteMovie function from the library
+  - Refactored add-movie.js to use the createMovie function from the library
+  - Refactored get-session-movies.js to use the getMovies function from the library
+  - Refactored update-movie.js to use the updateMovie function from the library
+  - Refactored get-movie.js to use the getMovieById function from the library
+  - Refactored get-sessions.js to use the getSessions function from the library
+  - Refactored create-session.js to use the createSession function from the library
+  - Refactored get-session.js to use the getSessionById function from the library
+  - Refactored add-session.js to use the createSession function from the library
+  - Refactored get-movies.js to use the getMovies function from the library
+  - Refactored delete-all-movies.js to use the deleteAllMovies function from the library
+  - Refactored delete-all-sessions.js to use the deleteAllSessions function from the library
+- Enhanced FaunaDB library to handle different response structures from FaunaDB
+- Refactored get-session-movies.js to use the FaunaDB library
+- Enhanced getMovies function to ensure movies is always an array
+- Improved error handling in get-session-movies.js
+- Refactored get-sessions.js to use the FaunaDB library
+- Moved complex date extraction logic from get-sessions.js to the FaunaDB library
+- Refactored delete-all-movies.js to use the FaunaDB library
+- Refactored delete-all-sessions.js to use the FaunaDB library
+- Standardized response format across all Netlify functions
+- Reduced code duplication across Netlify functions
+- Improved error reporting in all refactored functions
+- Simplified bulk deletion operations by delegating complex logic to the library
+- Updated frontend API code to use the new dedicated Netlify functions instead of the monolithic movies.js function
+- Enhanced frontend API error handling with more detailed error messages
+- Improved frontend API response parsing to handle different response structures
 
 ### Fixed
 - Fixed missing session names in get-sessions API response
@@ -90,9 +131,30 @@ All notable changes to this project will be documented in this file.
 - Fixed inconsistent collection names in FaunaDB queries
 - Added null-check operator to delete operations to prevent errors when documents don't exist
 - Fixed 'fetchMovies is not defined' error in Session.js by moving the function outside of useEffect scope
+- Simplified Netlify functions by removing complex FaunaDB operations and using the centralized library instead
+- Eliminated complex multi-approach update strategies in update-movie.js by using the library implementation
+- Fixed "movies.map is not a function" error in get-session-movies.js by ensuring the movies variable is always an array
+- Enhanced getMovies function in FaunaDB library to handle different response structures and always return an array
+- Simplified get-sessions.js by removing complex date extraction logic and using the library implementation instead
+- Improved error handling in get-session.js by including detailed error messages in the response
+- Enhanced error reporting in add-session.js and get-movies.js with more descriptive error messages
+- Simplified bulk deletion operations by moving complex logic to the FaunaDB library
+- Fixed TypeError in get-session-movies.js when movies.map is called on non-array
+- Fixed inconsistent date handling in get-sessions.js
+- Fixed potential null reference errors in database operations
+- Fixed error handling in bulk deletion operations
+- Fixed inconsistent response formats across functions
 
 ### Removed
-- Removed advanced search functionality (director/actor search) due to OMDB API limitations
-- Removed search status indicators and spinner
-- Removed search tips section 
-- Removed unnecessary VoteButton from movie detail view 
+- Removed monolithic movies.js Netlify function in favor of dedicated functions for each operation
+
+### Security
+- Improved input validation in all refactored functions
+
+## [0.1.0] - 2023-04-15
+
+### Added
+- Initial release
+- Basic movie voting functionality
+- Session management
+- FaunaDB integration 
