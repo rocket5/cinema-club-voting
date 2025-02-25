@@ -15,39 +15,39 @@ function Session() {
     const [sessionData, setSessionData] = useState(null);
     const navigate = useNavigate();
 
+    const fetchSessionData = async () => {
+        try {
+            const response = await fetch(`/.netlify/functions/get-session?sessionId=${sessionId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('Received session data:', data);
+            setSessionData(data);
+        } catch (err) {
+            console.error('Error fetching session data:', err);
+            // Don't set error here, as we'll still try to fetch movies
+        }
+    };
+
+    const fetchMovies = async () => {
+        try {
+            const response = await fetch(`/.netlify/functions/get-session-movies?sessionId=${sessionId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('Received movies data:', data);
+            setMovies(data.movies || []);
+            setLoading(false);
+        } catch (err) {
+            console.error('Error fetching movies:', err);
+            setError(err.message);
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchSessionData = async () => {
-            try {
-                const response = await fetch(`/.netlify/functions/get-session?sessionId=${sessionId}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log('Received session data:', data);
-                setSessionData(data);
-            } catch (err) {
-                console.error('Error fetching session data:', err);
-                // Don't set error here, as we'll still try to fetch movies
-            }
-        };
-
-        const fetchMovies = async () => {
-            try {
-                const response = await fetch(`/.netlify/functions/get-session-movies?sessionId=${sessionId}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log('Received movies data:', data);
-                setMovies(data.movies || []);
-                setLoading(false);
-            } catch (err) {
-                console.error('Error fetching movies:', err);
-                setError(err.message);
-                setLoading(false);
-            }
-        };
-
         fetchSessionData();
         fetchMovies();
     }, [sessionId]);

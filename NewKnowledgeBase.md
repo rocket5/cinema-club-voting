@@ -1,6 +1,20 @@
 # New Knowledge Base
 
-This document contains insights and learnings about the Cinema Club Voting codebase.
+This file documents new insights and knowledge gained about the Cinema Club Voting codebase.
+
+## FaunaDB Integration
+
+- The project uses FaunaDB as its database solution
+- FaunaDB client is initialized in Netlify functions using environment variables for the secret key
+- The database schema includes collections for Movies, Sessions, and Votes
+- FaunaDB Query Language (FQL) is used for database operations
+- Netlify functions serve as the API layer between the frontend and FaunaDB
+- The project uses the newer `fauna` package instead of the older `faunadb` package
+- Error handling is implemented consistently across database operations with detailed error messages
+- Timestamps are automatically added to records for created and updated operations
+- FaunaDB requires the use of the null-check operator (`!`) when deleting documents to prevent errors when the document doesn't exist
+- Collection names in FaunaDB queries must be consistent and match the actual collection names in the database (e.g., `movies`, `sessions`, `votes` instead of `Movie`, `Session`, `Vote`)
+- FaunaDB's document IDs are strings, not numbers, and must be handled accordingly when performing operations
 
 ## Architecture Insights
 
@@ -249,3 +263,12 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - For advanced search capabilities like filtering by director or actor, a different API like TMDB would be more suitable
 - When implementing search functionality, it's crucial to review API documentation to understand its capabilities and limitations
 - The OMDB API is best used for title-based searches and retrieving detailed information about specific movies by IMDb ID 
+
+## React Component Best Practices
+
+- Functions that need to be called from event handlers should be defined at the component level, not inside useEffect hooks
+- When a function is defined inside a useEffect hook, it's only accessible within that hook's scope
+- Moving data fetching functions outside of useEffect makes them reusable throughout the component
+- For functions that depend on state or props, define them at the component level to ensure they have access to the latest values
+- When refreshing data after operations like delete or update, having reusable fetch functions at the component level simplifies the code
+- The React component scope follows JavaScript closure rules - inner functions have access to outer variables, but not vice versa 

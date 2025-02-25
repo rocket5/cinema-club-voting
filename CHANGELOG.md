@@ -1,10 +1,19 @@
 # Changelog
 
-All notable changes to the Cinema Club Voting project will be documented in this file.
+All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
 ### Added
+- Created FaunaDB library functions for database operations
+  - Added client module for FaunaDB connection
+  - Added movies module with CRUD operations for movie data
+  - Added sessions module with CRUD operations for session data
+  - Added votes module with CRUD operations for vote data
+- Added comprehensive unit tests for all FaunaDB library functions
+  - Created test suite for movies module
+  - Created test suite for sessions module
+  - Created test suite for votes module
 - Added required session name input field when creating a new session
 - Added modal dialog for session creation with validation
 - Added session name display in session list and session page
@@ -63,7 +72,7 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Improved handling of different FaunaDB response structures
 - Fixed JSON parsing of API responses with better error reporting
 - Fixed handling of date objects from FaunaDB with proper property extraction
-- Improved date formatting to handle both string and object date formats
+- Fixed date formatting to handle both string and object date formats
 - Added parsing of nested isoString property in JSON date strings
 - Fixed handling of FaunaDB Time objects with @ts property 
 - Fixed issue where movies were not displayed when clicking on a session in Vote mode
@@ -78,6 +87,9 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Fixed 500 Internal Server Error when deleting movies by creating a dedicated delete-movie function with multiple fallback strategies
 - Fixed movie deletion by implementing multiple deletion approaches to handle various FaunaDB document formats and ID types
 - Fixed inconsistencies between FaunaDB client versions by standardizing on the newer client for delete operations
+- Fixed inconsistent collection names in FaunaDB queries
+- Added null-check operator to delete operations to prevent errors when documents don't exist
+- Fixed 'fetchMovies is not defined' error in Session.js by moving the function outside of useEffect scope
 
 ### Removed
 - Removed advanced search functionality (director/actor search) due to OMDB API limitations
