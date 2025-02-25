@@ -1,0 +1,32 @@
+# Changelog
+
+All notable changes to the Cinema Club Voting project will be documented in this file.
+
+## [Unreleased]
+
+### Added
+- Show list of previous sessions in Vote mode
+- Mode-specific UI on Home page (Create Session in Host mode, Session List in Vote mode)
+- Sessions list component with nice formatting
+- Serverless function to fetch all sessions from database
+- CSS styling for session cards
+- Added retry button for session loading errors
+- Added better error handling and user feedback
+
+### Changed
+- Home page now conditionally renders based on current app mode
+- Session cards display session ID and creation time
+- Improved resilience in API response handling
+- Enhanced debug logging for troubleshooting
+
+### Fixed
+- Fixed date formatting issue in SessionsList component that was causing "Invalid time value" error
+- Added more robust date handling in get-sessions serverless function
+- Added fallback values for missing status fields
+- Fixed HTTP 500 error in get-sessions serverless function by improving error handling
+- Improved handling of different FaunaDB response structures
+- Fixed JSON parsing of API responses with better error reporting
+- Fixed handling of date objects from FaunaDB with proper property extraction
+- Improved date formatting to handle both string and object date formats
+- Added parsing of nested isoString property in JSON date strings
+- Fixed handling of FaunaDB Time objects with @ts property 
