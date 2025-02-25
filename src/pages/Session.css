@@ -1,0 +1,25 @@
+/* Session.css */
+.session-header {
+    margin-bottom: 2rem;
+}
+
+.error-container {
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid #f8d7da;
+    background-color: #fff5f5;
+    border-radius: 0.5rem;
+    margin: 2rem 0;
+}
+
+.retry-btn {
+    margin-top: 1rem;
+}
+
+/* Ensure mobile responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+} 

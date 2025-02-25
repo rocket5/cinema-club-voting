@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppMode } from '../context/AppModeContext';
 import SessionsList from '../components/SessionsList';
+import DebugPanel from '../components/DebugPanel';
 import './Home.css';
 
 function Home() {
@@ -122,6 +123,9 @@ function Home() {
                     />
                 </>
             )}
+            
+            {/* Only show debug panel in Host mode */}
+            {isHostMode && <DebugPanel />}
         </div>
     );
 }
