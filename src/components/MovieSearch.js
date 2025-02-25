@@ -12,12 +12,20 @@ function MovieSearch({ onSelectMovie }) {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    
+    // Validate that the search field is filled
+    if (!query.trim()) {
+      setError('Please enter a movie title to search');
+      return;
+    }
     
     setLoading(true);
     setError(null);
+    setSearchResults([]);
+    
     try {
       const results = await searchMovies(query, 1);
+      
       if (results.Response === 'True') {
         setSearchResults(results.Search);
         setTotalResults(parseInt(results.totalResults, 10));
@@ -43,6 +51,7 @@ function MovieSearch({ onSelectMovie }) {
     
     try {
       const results = await searchMovies(query, nextPage);
+      
       if (results.Response === 'True') {
         setSearchResults([...searchResults, ...results.Search]);
         setPage(nextPage);
@@ -63,19 +72,33 @@ function MovieSearch({ onSelectMovie }) {
   return (
     <div className="movie-search-container">
       <form onSubmit={handleSearch} className="search-form">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for a movie..."
-          className="search-input"
-        />
+        <div className="search-fields">
+          <div className="search-field">
+            <label htmlFor="title-search">Movie Title</label>
+            <input
+              id="title-search"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Enter movie title..."
+              className="search-input"
+            />
+          </div>
+        </div>
+
         <button type="submit" className="search-button" disabled={loading}>
           {loading ? 'Searching...' : 'Search'}
         </button>
       </form>
 
       {error && <div className="search-error">{error}</div>}
+
+      {searchResults.length > 0 && (
+        <div className="search-results-count">
+          Found {searchResults.length} {searchResults.length === 1 ? 'movie' : 'movies'}
+          {totalResults > searchResults.length && ` (of ${totalResults} total)`}
+        </div>
+      )}
 
       <div className="search-results">
         {searchResults.map((movie) => (
@@ -89,7 +112,7 @@ function MovieSearch({ onSelectMovie }) {
             </div>
             <div className="movie-info">
               <h3>{movie.Title}</h3>
-              <p>{movie.Year}</p>
+              <p className="movie-year">{movie.Year}</p>
               <p className="movie-type">{movie.Type}</p>
             </div>
           </div>
@@ -104,6 +127,12 @@ function MovieSearch({ onSelectMovie }) {
         >
           {loading ? 'Loading...' : 'Load More'}
         </button>
+      )}
+
+      {searchResults.length === 0 && !loading && !error && (
+        <div className="search-empty-state">
+          <p>Enter a movie title to search</p>
+        </div>
       )}
     </div>
   );

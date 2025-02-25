@@ -14,6 +14,7 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Navigation elements are conditionally rendered based on the current application mode (Host/Vote)
 - Navigation has been simplified to focus only on essential functions, with secondary actions moved to contextual locations
 - The MovieCard component is designed to display rich movie data from OMDB API, including poster, year, director, genre, and IMDB rating
+- The MovieSearch component focuses on title-based search due to OMDB API limitations
 
 ## Technical Implementation Details
 
@@ -55,6 +56,10 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Extensive logging is crucial for debugging FaunaDB operations, especially capturing the structure of returned documents
 - When integrating external APIs like OMDB, it's important to handle optional fields with fallback values to prevent rendering errors
 - Processing data at the list component level ensures consistent data structure before passing to individual card components
+- Toggle buttons for UI modes should provide clear visual feedback about the current state
+- Form layouts should adapt responsively between mobile and desktop views
+- Null checks are essential when working with API responses that may have missing fields
+- Empty states with helpful instructions improve the user experience for new users
 
 ## FaunaDB Date Format Specifics
 
@@ -89,3 +94,12 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Processing movie data at the list level ensures consistent structure before rendering individual cards
 - The OMDB API returns poster URLs that can be used directly in the UI
 - For movies without posters, always provide a placeholder image URL 
+- The OMDB API doesn't have direct parameters for searching by director or actor, only title search is supported
+- The OMDB API's search endpoint (with parameter 's') only returns basic movie information, requiring additional calls to get full details
+- The OMDB API response structure differs between search results and detailed movie information
+- The OMDB API may return 'N/A' for missing fields rather than null or empty strings
+- The OMDB API has rate limits, so it's important to optimize the number of API calls made during searches
+- The OMDB API parameters are limited to: search term (s), type (movie/series/episode), year (y), page number, and response format
+- For advanced search capabilities like filtering by director or actor, a different API like TMDB would be more suitable
+- When implementing search functionality, it's crucial to review API documentation to understand its capabilities and limitations
+- The OMDB API is best used for title-based searches and retrieving detailed information about specific movies by IMDb ID 

@@ -17,6 +17,7 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Added ability for hosts to see and manage all existing sessions
 - Added visual indicator for manageable sessions in Host mode
 - Enhanced MovieCard to display additional OMDB information (poster, year, director, genre, IMDB rating)
+- Added search results count display
 
 ### Changed
 - Home page now conditionally renders based on current app mode
@@ -33,6 +34,8 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Removed "Add Movie" button from navigation bar completely
 - Updated get-session-movies serverless function to include OMDB fields in the response
 - Improved MovieList component to ensure consistent movie data structure
+- Improved movie card styling with better typography and visual hierarchy
+- Simplified movie search to focus on title search only
 
 ### Fixed
 - Fixed date formatting issue in SessionsList component that was causing "Invalid time value" error
@@ -48,4 +51,9 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Fixed issue where movies were not displayed when clicking on a session in Vote mode
 - Fixed issue where "Add New Movie" button was shown in Vote mode
 - Fixed issue with bulk delete operations not properly deleting documents in FaunaDB
-- Implemented multi-approach deletion strategy to handle different FaunaDB document formats 
+- Implemented multi-approach deletion strategy to handle different FaunaDB document formats
+
+### Removed
+- Removed advanced search functionality (director/actor search) due to OMDB API limitations
+- Removed search status indicators and spinner
+- Removed search tips section 
