@@ -19,6 +19,7 @@ function App() {
             <Routes>
               <Route path="/session/:sessionId" element={<Session />} />
               <Route path="/session/:sessionId/add" element={<AddMovie />} />
+              <Route path="/session/:sessionId/edit/:movieId" element={<AddMovie />} />
               <Route path="/" element={<Home />} />
               <Route 
                 path="/add" 

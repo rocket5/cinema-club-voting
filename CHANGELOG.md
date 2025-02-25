@@ -21,6 +21,12 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Added visual indicator for manageable sessions in Host mode
 - Enhanced MovieCard to display additional OMDB information (poster, year, director, genre, IMDB rating)
 - Added search results count display
+- Added movie editing functionality with update-movie serverless function
+- Added view, edit, and delete buttons with icons in host mode
+- Added get-movie serverless function to fetch individual movie details
+- Added retry functionality for movie detail loading errors
+- Added delete-movie serverless function with multiple fallback strategies for reliable movie deletion
+- Added comprehensive logging for delete operations to facilitate debugging
 
 ### Changed
 - Updated session lists to sort by date with newest sessions appearing first
@@ -43,6 +49,10 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Improved MovieList component to ensure consistent movie data structure
 - Improved movie card styling with better typography and visual hierarchy
 - Simplified movie search to focus on title search only
+- Replaced text buttons with icon buttons for better UI in movie cards
+- Updated AddMovie component to support both adding and editing movies
+- Improved MovieDetail component with better error handling and data display
+- Enhanced movie detail view with proper fallbacks for missing data
 
 ### Fixed
 - Fixed missing session names in get-sessions API response
@@ -60,8 +70,17 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Fixed issue where "Add New Movie" button was shown in Vote mode
 - Fixed issue with bulk delete operations not properly deleting documents in FaunaDB
 - Implemented multi-approach deletion strategy to handle different FaunaDB document formats
+- Fixed non-functional edit and delete buttons in host mode
+- Fixed movie detail view not working due to missing get-movie serverless function
+- Fixed error handling in MovieDetail component to show meaningful error messages
+- Fixed update-movie serverless function to properly handle movie updates with improved error handling and multiple ID format support
+- Fixed 500 Internal Server Error in update-movie function by completely rewriting the update logic with proper FaunaDB document structure and multiple fallback strategies
+- Fixed 500 Internal Server Error when deleting movies by creating a dedicated delete-movie function with multiple fallback strategies
+- Fixed movie deletion by implementing multiple deletion approaches to handle various FaunaDB document formats and ID types
+- Fixed inconsistencies between FaunaDB client versions by standardizing on the newer client for delete operations
 
 ### Removed
 - Removed advanced search functionality (director/actor search) due to OMDB API limitations
 - Removed search status indicators and spinner
 - Removed search tips section 
+- Removed unnecessary VoteButton from movie detail view 

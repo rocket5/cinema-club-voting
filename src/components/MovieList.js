@@ -8,7 +8,8 @@ function MovieList({
   rankings, 
   onRankChange, 
   isHostMode, 
-  onDelete 
+  onDelete,
+  onEdit
 }) {
   if (!movies || movies.length === 0) {
     return (
@@ -45,6 +46,7 @@ function MovieList({
             onRankChange={onRankChange}
             isHostMode={isHostMode}
             onDelete={onDelete}
+            onEdit={onEdit}
           />
         </div>
       ))}

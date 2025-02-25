@@ -1,6 +1,6 @@
 // src/pages/Session.js
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useAppMode } from '../context/AppModeContext';
 import MovieList from '../components/MovieList';
 import './Session.css';
@@ -13,6 +13,7 @@ function Session() {
     const [error, setError] = useState(null);
     const [rankings, setRankings] = useState({});
     const [sessionData, setSessionData] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchSessionData = async () => {
@@ -59,23 +60,32 @@ function Session() {
     };
 
     const handleDeleteMovie = async (movieId) => {
-        if (window.confirm('Are you sure you want to remove this movie?')) {
+        if (window.confirm("Are you sure you want to delete this movie?")) {
             try {
-                const response = await fetch(`/.netlify/functions/movies?id=${movieId}`, {
+                const response = await fetch(`/.netlify/functions/delete-movie?id=${movieId}`, {
                     method: 'DELETE',
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                const data = await response.json();
                 
-                // Remove the movie from the local state
-                setMovies(movies.filter(movie => movie.id !== movieId));
-            } catch (err) {
-                console.error('Error deleting movie:', err);
-                alert(`Failed to delete movie: ${err.message}`);
+                if (response.ok) {
+                    console.log('Movie deleted successfully:', data);
+                    // Refresh the movie list
+                    fetchMovies();
+                } else {
+                    console.error('Failed to delete movie:', data);
+                    alert(`Failed to delete movie: ${data.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error deleting movie:', error);
+                alert(`Error deleting movie: ${error.message || 'Unknown error'}`);
             }
         }
+    };
+
+    const handleEditMovie = (movieId) => {
+        // Navigate to the AddMovie page with the movie ID for editing
+        navigate(`/session/${sessionId}/edit/${movieId}`);
     };
 
     if (loading) return <div className="container mt-4"><div className="text-center">Loading...</div></div>;
@@ -110,6 +120,7 @@ function Session() {
                     onRankChange={handleRankChange}
                     isHostMode={isHostMode}
                     onDelete={handleDeleteMovie}
+                    onEdit={handleEditMovie}
                 />
             )}
         </div>

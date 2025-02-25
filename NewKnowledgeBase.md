@@ -17,6 +17,9 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Navigation has been simplified to focus only on essential functions, with secondary actions moved to contextual locations
 - The MovieCard component is designed to display rich movie data from OMDB API, including poster, year, director, genre, and IMDB rating
 - The MovieSearch component focuses on title-based search due to OMDB API limitations
+- The AddMovie component is designed to handle both adding new movies and editing existing ones
+- The application follows a RESTful API pattern with separate serverless functions for different operations (get, create, update, delete)
+- The codebase contains a mix of older and newer FaunaDB client implementations, requiring careful handling of database operations
 
 ## Technical Implementation Details
 
@@ -31,6 +34,10 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - The same SessionsList component is used for both host and voter modes, with conditional rendering based on isHostMode prop
 - OMDB API integration provides rich movie data that is stored in FaunaDB and displayed in the UI
 - The MovieList component processes movie data to ensure consistent structure before passing to MovieCard
+- Bootstrap Icons are used for action buttons to create a cleaner, more modern UI
+- The application uses a consistent pattern for CRUD operations with separate serverless functions
+- Detailed error handling is implemented at both the API and UI levels for better user experience
+- Dedicated serverless functions for specific operations (like delete-movie) provide better reliability than generic endpoints
 
 ## Recent Learnings
 
@@ -69,6 +76,73 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Form layouts should adapt responsively between mobile and desktop views
 - Null checks are essential when working with API responses that may have missing fields
 - Empty states with helpful instructions improve the user experience for new users
+- Using icons instead of text for action buttons creates a cleaner, more modern UI
+- The useNavigate hook from React Router is essential for programmatic navigation in response to user actions
+- Implementing edit functionality requires careful state management to handle both new and existing data
+- Conditional rendering based on edit mode helps reuse the same form component for both adding and editing
+- Loading states with spinners improve user experience during data fetching operations
+- Error states with retry options help users recover from API failures
+- When implementing a feature, ensure all required serverless functions exist and are properly implemented
+- Detailed error logging in both the browser console and serverless function logs is essential for debugging
+- Providing a retry mechanism for failed API calls improves user experience and helps recover from transient errors
+- Always include a way for users to navigate back when encountering errors to prevent them from getting stuck
+- When updating documents in FaunaDB, it's important to first verify the document exists before attempting to update it
+- Multiple ID format handling (string vs numeric) is necessary for robust FaunaDB operations
+- Implementing fallback strategies for database operations increases the reliability of the application
+- Detailed logging before, during, and after database operations helps identify the exact point of failure
+- When updating a document in FaunaDB, using a multi-step approach with verification improves reliability
+- FaunaDB document updates require a specific structure with a nested 'data' property for the fields to update
+- When updating FaunaDB documents, it's important to use the correct syntax: `doc.update({ data: { field: value } })`
+- FaunaDB has multiple valid syntaxes for updating documents, and implementing fallbacks for each increases reliability
+- The FaunaDB client library may handle document references differently between versions, requiring multiple approaches
+- Using native JavaScript Date objects and converting to ISO strings is more reliable than using FQL Time functions
+- When updating documents, only include the fields that need to be updated to minimize the risk of data loss
+- FaunaDB schema definitions may not reflect the actual structure of documents in the database due to schema evolution
+- When a codebase contains a mix of older and newer FaunaDB client implementations, it's important to create dedicated functions for critical operations
+- Replacing generic endpoints (like movies.js) with dedicated functions for specific operations improves reliability and maintainability
+- When deleting documents in FaunaDB, it's important to use the same client library and syntax as other operations for consistency
+- Updating component code to use new endpoints is simpler than trying to fix complex generic endpoints
+- When implementing critical database operations like deletion, it's essential to try multiple approaches with different syntax variations
+- Examining working code (like delete-all-movies.js) can provide valuable insights into successful patterns for database operations
+- For maximum reliability, implement multiple deletion approaches to handle all possible FaunaDB document formats and ID types
+- Detailed logging of each deletion attempt helps identify which approach works for specific document structures
+- When a function fails with a 500 error, examining the Netlify function logs is crucial for understanding the root cause
+- When client libraries cause inconsistent behavior, using direct REST API calls can provide a more reliable solution
+- Missing or inconsistent client library files can cause hard-to-debug issues in serverless functions
+- Direct REST API calls to FaunaDB can bypass client library inconsistencies and version conflicts
+- Enhanced error reporting in UI components helps users understand what went wrong and provides developers with better debugging information
+- Using built-in Node.js modules like 'https' instead of external dependencies reduces deployment issues in serverless functions
+- Serverless functions should minimize external dependencies to reduce deployment size and potential compatibility issues
+- When working with serverless functions, it's important to check if required modules are available in the runtime environment
+- When working with FaunaDB, it's important to understand the different document structures that can exist in the database
+- FaunaDB FQL queries can be used to search for documents in multiple ways, providing more flexibility than REST API calls
+- The FaunaDB query language (FQL) allows for complex operations like filtering, mapping, and conditional logic
+- When deleting documents in FaunaDB, it's important to verify the document exists before attempting to delete it
+- FaunaDB documents can be referenced in multiple ways: by ID, by reference, or by query
+- When working with FaunaDB, it's important to identify which version of FQL syntax is supported by your database
+- The FQL syntax in the documentation may not match the syntax supported by your specific FaunaDB instance
+- Error messages like "Cannot use `[]` operator with type `Set<movies>`" indicate that you're using newer FQL syntax with an older FaunaDB version
+- Classic FQL syntax uses functions like Get(), Match(), Delete() instead of the newer dot notation syntax
+- When troubleshooting FaunaDB operations, pay close attention to the exact error messages as they provide clues about the correct syntax
+- When troubleshooting a non-working function, examine a similar working function and replicate its approach exactly
+- Using the exact same client library and version is crucial for consistent behavior across related functions
+- When multiple approaches fail, the most reliable solution is to copy the approach from a known working function
+- The client library import statement is critical - using `const { Client, fql } = require('fauna')` vs other import methods can make a difference
+- For maximum reliability, use the same client initialization, query syntax, and error handling as a working function
+- When using FQL queries, avoid direct string interpolation inside the query
+- FQL queries with variables are more reliable than direct string interpolation
+- String values in FQL queries should be defined as variables outside string contexts to avoid escaping issues
+- When troubleshooting FQL syntax errors, examine the exact error message which often points to the specific syntax issue
+- For critical operations like deletion, finding the document first and then using its exact ID for deletion is more reliable than direct ID-based deletion
+- Comprehensive error handling with multiple fallback strategies is essential for robust serverless functions
+- Enhanced error reporting in UI components provides better user feedback and debugging information
+- When all else fails, simplify the approach and focus on what works rather than trying to fix complex queries
+- For FaunaDB operations, it's often more reliable to first fetch all documents and then find the target document in JavaScript before performing operations
+- Using a JavaScript-first approach (finding items in memory) before attempting database operations can be more reliable than complex FQL queries
+- When implementing multiple deletion strategies, use a cascading approach where each strategy is only attempted if the previous one fails
+- Implementing a "find first, then delete" pattern is more reliable than trying to delete directly by ID
+- For complex operations, it's better to break them down into multiple simple steps rather than trying to do everything in a single query
+- When working with FaunaDB, extensive logging of input parameters, intermediate results, and final outcomes is essential for debugging
 
 ## FaunaDB Date Format Specifics
 
@@ -93,6 +167,69 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Try multiple ID formats when deleting documents (numeric ID, string ID, quoted ID) as FaunaDB may interpret them differently
 - For critical operations, verify the results by querying the database again after the operation
 - Numeric vs string IDs can cause issues in FaunaDB - always try both formats if one fails 
+- When updating documents in FaunaDB, use the pattern `let doc = collection.byId(id)` followed by `doc.update(data)`
+- The FQL `Time.now()` function can be used to automatically timestamp document updates
+- When fetching a single document by ID, use the pattern `let doc = collection.byId(id)` followed by `doc` to return the document
+- Always check if a document exists before trying to access its properties to avoid runtime errors
+- For update operations, implement a multi-step approach: first check if the document exists, then attempt the update
+- When an update fails, try alternative ID formats (string vs numeric) as FaunaDB may handle them differently
+- Wrap each database operation in its own try-catch block to implement fallback strategies
+- Log the document structure before and after update operations to verify changes were applied correctly
+- Use the spread operator (...) when returning updated document data to include all fields in the response
+- FaunaDB document updates require a specific structure with fields nested under a 'data' property
+- There are multiple valid syntaxes for updating documents in FaunaDB:
+  - `doc.update({ data: { field: value } })`
+  - `collection.update(id, { data: { field: value } })`
+- The FaunaDB client may interpret document references differently between versions, requiring multiple update approaches
+- When updating documents, it's safer to use JavaScript Date objects converted to ISO strings than FQL Time functions
+- For maximum compatibility, implement at least three fallback strategies for critical database operations
+- The actual document structure in FaunaDB may differ from the schema definition due to schema evolution over time
+- FaunaDB's error messages may not always clearly indicate the root cause of failures, requiring extensive logging
+- There are multiple valid syntaxes for deleting documents in FaunaDB:
+  - `doc.delete()`
+  - `collection.delete(id)`
+- When a codebase uses multiple versions of the FaunaDB client, it's better to create dedicated functions for each operation
+- The older FaunaDB client uses `q.Delete(q.Ref(q.Collection('movies'), id))` syntax
+- The newer FaunaDB client uses `movies.byId(id).delete()` syntax
+- Mixing different client versions in the same codebase can lead to inconsistent behavior and errors
+- For reliable document deletion in FaunaDB, implement multiple approaches:
+  1. Using forEach to iterate through all documents and find the target by ID
+  2. Direct deletion with byId using numeric ID
+  3. Direct deletion with byId using string ID
+- When implementing multiple fallback strategies, use a boolean flag to track success and only try subsequent approaches if previous ones fail
+- Always return detailed error information to the client when all deletion approaches fail to aid in debugging
+- The "delete all" functionality can be a valuable reference for implementing single-document deletion with the same patterns
+- When debugging FaunaDB operations, log the type of ID being used (typeof id) as type mismatches are a common source of errors
+- FQL queries can be used to find documents by any field, not just by ID
+- The `movies.where(.id == "value")` syntax is more reliable than direct document references
+- FQL's `filter()` function can be used to search for documents with specific field values
+- The `append()` function in FQL can be used to add items to an array
+- FQL's `forEach()` function can be used to iterate over collections and perform operations on each document
+- When a document is not found, FQL operations may return null, which requires null checking before operations
+- The error "Type 'Null' does not have field 'delete'" indicates an attempt to call a method on a null value
+- Classic FQL syntax uses functions like Get(), Match(), Delete() instead of the newer dot notation syntax
+- The error "Cannot use `[]` operator with type `Set<movies>`" indicates that array indexing is not supported in your FaunaDB version
+- The error "Type `Set<movies>` does not have field `filter`" indicates that the filter() method is not supported in your FaunaDB version
+- The error "Type `Array<Never>` does not have field `count`" indicates that the count() method is not supported in your FaunaDB version
+- Classic FQL uses Lambda() and Var() for working with variables instead of arrow functions
+- Classic FQL uses Select() to access object properties instead of dot notation
+- When using classic FQL, document references are created with Ref(Collection("name"), "id")
+- The Paginate() function is used to handle sets of references in classic FQL
+- The Map() function is used to apply operations to each item in a set in classic FQL
+- The Filter() function is used to filter sets based on a condition in classic FQL
+- The Equals() function is used for equality comparisons in classic FQL
+- The Documents() function is used to get all documents in a collection in classic FQL
+- When a function works in one context (bulk operations) but not another (single operations), use the exact same approach for both
+- The newer FaunaDB client uses `const { Client, fql } = require('fauna')` import syntax
+- The newer FaunaDB client supports dot notation for accessing collection methods: movies.all(), movies.byId()
+- When multiple deletion approaches fail, try using forEach to iterate through all documents and find the target by ID
+- Using a combination of string and numeric ID comparisons increases reliability
+- Tracking success with a boolean flag and returning structured results helps identify which approach worked
+- For string values in FQL, define variables at the beginning of the query
+- For numeric values in FQL, define variables at the beginning of the query
+- Always use proper null checking in FQL queries: `if (doc != null) { ... }`
+- When a query fails with syntax errors, try restructuring it to use variables instead of direct interpolation
+- FQL queries should be structured to avoid direct string interpolation within expressions
 
 ## OMDB API Integration
 
@@ -100,7 +237,7 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - When storing OMDB data in FaunaDB, include all relevant fields to enhance the user experience
 - Always handle missing OMDB fields with fallback values to prevent rendering errors
 - The MovieCard component can display OMDB data using Bootstrap badges for a clean UI
-- Processing movie data at the list level ensures consistent structure before rendering individual cards
+- Processing movie data at the list level ensures consistent data structure before rendering individual cards
 - The OMDB API returns poster URLs that can be used directly in the UI
 - For movies without posters, always provide a placeholder image URL 
 - The OMDB API doesn't have direct parameters for searching by director or actor, only title search is supported

@@ -1,6 +1,6 @@
 // src/components/MovieCard.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import RankInput from './RankInput';
 
 function MovieCard({ 
@@ -9,8 +9,24 @@ function MovieCard({
   currentRank, 
   onRankChange, 
   isHostMode,
-  onDelete 
+  onDelete,
+  onEdit
 }) {
+  const navigate = useNavigate();
+
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(movie.id);
+    } else {
+      // Fallback to direct navigation if no onEdit handler is provided
+      navigate(`/movie/${movie.id}/edit`);
+    }
+  };
+
+  const handleView = () => {
+    navigate(`/movie/${movie.id}`);
+  };
+
   return (
     <div className="card h-100 shadow-sm">
       <img 
@@ -47,17 +63,26 @@ function MovieCard({
         <div className="mt-auto">
           {isHostMode ? (
             <div className="d-flex gap-2">
-              <Link 
-                to={`/movie/${movie.id}`} 
+              <button 
+                onClick={handleView} 
                 className="btn btn-outline-primary flex-grow-1"
+                title="View movie details"
               >
-                Edit
-              </Link>
+                <i className="bi bi-eye"></i>
+              </button>
+              <button 
+                onClick={handleEdit} 
+                className="btn btn-outline-secondary flex-grow-1"
+                title="Edit movie"
+              >
+                <i className="bi bi-pencil"></i>
+              </button>
               <button 
                 onClick={() => onDelete?.(movie.id)} 
                 className="btn btn-outline-danger"
+                title="Delete movie"
               >
-                Delete
+                <i className="bi bi-trash"></i>
               </button>
             </div>
           ) : (
@@ -68,12 +93,12 @@ function MovieCard({
                 currentRank={currentRank}
                 onRankChange={onRankChange}
               />
-              <Link 
-                to={`/movie/${movie.id}`} 
+              <button 
+                onClick={handleView} 
                 className="btn btn-outline-primary mt-2 w-100"
               >
-                View Details
-              </Link>
+                <i className="bi bi-eye me-2"></i> View Details
+              </button>
             </>
           )}
         </div>
