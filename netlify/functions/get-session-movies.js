@@ -31,7 +31,13 @@ exports.handler = async (event, context) => {
             description: doc.description,
             addedBy: doc.addedBy,
             votes: doc.votes || 0,
-            sessionId: doc.sessionId
+            sessionId: doc.sessionId,
+            // Include OMDB fields if they exist
+            poster: doc.poster || null,
+            year: doc.year || null,
+            director: doc.director || null,
+            genre: doc.genre || null,
+            imdbRating: doc.imdbRating || null
         }));
 
         console.log('Processed movies array:', moviesArray);

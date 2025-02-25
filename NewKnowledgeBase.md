@@ -13,6 +13,7 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - The application uses a mode-based architecture to control which features are available to hosts vs. voters
 - Navigation elements are conditionally rendered based on the current application mode (Host/Vote)
 - Navigation has been simplified to focus only on essential functions, with secondary actions moved to contextual locations
+- The MovieCard component is designed to display rich movie data from OMDB API, including poster, year, director, genre, and IMDB rating
 
 ## Technical Implementation Details
 
@@ -23,6 +24,8 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - The voting functionality is implemented using a ranking system with the RankInput component
 - Bulk database operations are implemented through dedicated Netlify serverless functions
 - The same SessionsList component is used for both host and voter modes, with conditional rendering based on isHostMode prop
+- OMDB API integration provides rich movie data that is stored in FaunaDB and displayed in the UI
+- The MovieList component processes movie data to ensure consistent structure before passing to MovieCard
 
 ## Recent Learnings
 
@@ -50,6 +53,8 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - When deleting documents in FaunaDB, it's more reliable to first assign the document to a variable using `let doc = collection.byId(id)` and then call `doc.delete()`
 - IDs in FaunaDB should be explicitly converted to strings when used in queries to avoid type mismatches
 - Extensive logging is crucial for debugging FaunaDB operations, especially capturing the structure of returned documents
+- When integrating external APIs like OMDB, it's important to handle optional fields with fallback values to prevent rendering errors
+- Processing data at the list component level ensures consistent data structure before passing to individual card components
 
 ## FaunaDB Date Format Specifics
 
@@ -74,3 +79,13 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - Try multiple ID formats when deleting documents (numeric ID, string ID, quoted ID) as FaunaDB may interpret them differently
 - For critical operations, verify the results by querying the database again after the operation
 - Numeric vs string IDs can cause issues in FaunaDB - always try both formats if one fails 
+
+## OMDB API Integration
+
+- The OMDB API provides rich movie data including title, year, director, genre, plot, and ratings
+- When storing OMDB data in FaunaDB, include all relevant fields to enhance the user experience
+- Always handle missing OMDB fields with fallback values to prevent rendering errors
+- The MovieCard component can display OMDB data using Bootstrap badges for a clean UI
+- Processing movie data at the list level ensures consistent structure before rendering individual cards
+- The OMDB API returns poster URLs that can be used directly in the UI
+- For movies without posters, always provide a placeholder image URL 

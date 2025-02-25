@@ -1,0 +1,56 @@
+.movie-poster {
+  width: 100%;
+  max-width: 350px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.no-poster-placeholder {
+  width: 100%;
+  max-width: 350px;
+  height: 450px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.movie-description {
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.movie-meta {
+  margin-bottom: 1.5rem;
+}
+
+.imdb-rating .badge {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.added-by {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .movie-poster,
+  .no-poster-placeholder {
+    max-width: 250px;
+    height: 350px;
+    margin: 0 auto 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .movie-poster,
+  .no-poster-placeholder {
+    max-width: 200px;
+    height: 300px;
+  }
+} 

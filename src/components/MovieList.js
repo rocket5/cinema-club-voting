@@ -23,9 +23,20 @@ function MovieList({
     );
   }
 
+  // Ensure all movies have the expected properties
+  const processedMovies = movies.map(movie => ({
+    ...movie,
+    // Ensure these fields exist to prevent rendering errors
+    poster: movie.poster || movie.imageUrl || null,
+    year: movie.year || movie.releaseYear || null,
+    director: movie.director || null,
+    genre: movie.genre || null,
+    imdbRating: movie.imdbRating || null
+  }));
+
   return (
     <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      {movies.map(movie => (
+      {processedMovies.map(movie => (
         <div key={movie.id} className="col">
           <MovieCard 
             movie={movie}

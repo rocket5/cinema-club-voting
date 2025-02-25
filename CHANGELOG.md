@@ -16,6 +16,7 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Added debug panel with bulk delete functions for movies and sessions (Host mode only)
 - Added ability for hosts to see and manage all existing sessions
 - Added visual indicator for manageable sessions in Host mode
+- Enhanced MovieCard to display additional OMDB information (poster, year, director, genre, IMDB rating)
 
 ### Changed
 - Home page now conditionally renders based on current app mode
@@ -30,6 +31,8 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Updated SessionsList component to support both Host and Vote mode interfaces
 - Restricted "Create New Session" button to only be visible in Host mode
 - Removed "Add Movie" button from navigation bar completely
+- Updated get-session-movies serverless function to include OMDB fields in the response
+- Improved MovieList component to ensure consistent movie data structure
 
 ### Fixed
 - Fixed date formatting issue in SessionsList component that was causing "Invalid time value" error
