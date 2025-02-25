@@ -41,16 +41,6 @@ function Navbar() {
                 {isHostMode ? 'Manage Movies' : 'Vote'}
               </Link>
             </li>
-            {isHostMode && (
-              <li className="nav-item">
-                <Link 
-                  className={`nav-link ${location.pathname === '/add' ? 'active' : ''}`}
-                  to="/add"
-                >
-                  Add Movie
-                </Link>
-              </li>
-            )}
           </ul>
 
           <div className="d-flex align-items-center">

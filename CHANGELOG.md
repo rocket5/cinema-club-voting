@@ -29,6 +29,7 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Modified Home page to fetch and display sessions in both Host and Vote modes
 - Updated SessionsList component to support both Host and Vote mode interfaces
 - Restricted "Create New Session" button to only be visible in Host mode
+- Removed "Add Movie" button from navigation bar completely
 
 ### Fixed
 - Fixed date formatting issue in SessionsList component that was causing "Invalid time value" error

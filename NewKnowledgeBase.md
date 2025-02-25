@@ -11,6 +11,8 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 - The application has a well-structured component system with reusable components like MovieList and MovieCard
 - Debug tools are implemented as a collapsible panel component and restricted to Host mode for safety
 - The application uses a mode-based architecture to control which features are available to hosts vs. voters
+- Navigation elements are conditionally rendered based on the current application mode (Host/Vote)
+- Navigation has been simplified to focus only on essential functions, with secondary actions moved to contextual locations
 
 ## Technical Implementation Details
 
