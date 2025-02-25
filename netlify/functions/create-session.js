@@ -8,8 +8,23 @@ const client = new Client({
 
 exports.handler = async (event, context) => {
     try {
+        // Parse request body to get session name
+        const { sessionName, createdBy } = JSON.parse(event.body || '{}');
+        
+        // Validate session name
+        if (!sessionName || !sessionName.trim()) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    message: 'Session name is required'
+                })
+            };
+        }
+
         const result = await client.query(fql`
             sessions.create({
+                sessionName: ${sessionName},
+                createdBy: ${createdBy || 'host'},
                 createdAt: Time.now(),
                 status: "active"
             })
@@ -21,7 +36,8 @@ exports.handler = async (event, context) => {
             statusCode: 200,
             body: JSON.stringify({
                 message: 'Session created successfully',
-                sessionId: result.data.id  // Using data.id instead of just id
+                sessionId: result.data.id,  // Using data.id instead of just id
+                sessionName: result.data.sessionName
             })
         };
     } catch (error) {

@@ -5,6 +5,9 @@ All notable changes to the Cinema Club Voting project will be documented in this
 ## [Unreleased]
 
 ### Added
+- Added required session name input field when creating a new session
+- Added modal dialog for session creation with validation
+- Added session name display in session list and session page
 - Show list of previous sessions in Vote mode
 - Mode-specific UI on Home page (Create Session in Host mode, Session List in Vote mode)
 - Sessions list component with nice formatting
@@ -20,6 +23,10 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Added search results count display
 
 ### Changed
+- Updated session lists to sort by date with newest sessions appearing first
+- Updated session creation process to require a session name
+- Updated session cards to display session name instead of ID
+- Updated session page to display session name in the header
 - Home page now conditionally renders based on current app mode
 - Session cards display session ID and creation time
 - Improved resilience in API response handling
@@ -38,6 +45,7 @@ All notable changes to the Cinema Club Voting project will be documented in this
 - Simplified movie search to focus on title search only
 
 ### Fixed
+- Fixed missing session names in get-sessions API response
 - Fixed date formatting issue in SessionsList component that was causing "Invalid time value" error
 - Added more robust date handling in get-sessions serverless function
 - Added fallback values for missing status fields

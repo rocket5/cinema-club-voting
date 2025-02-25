@@ -12,8 +12,24 @@ function Session() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [rankings, setRankings] = useState({});
+    const [sessionData, setSessionData] = useState(null);
 
     useEffect(() => {
+        const fetchSessionData = async () => {
+            try {
+                const response = await fetch(`/.netlify/functions/get-session?sessionId=${sessionId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Received session data:', data);
+                setSessionData(data);
+            } catch (err) {
+                console.error('Error fetching session data:', err);
+                // Don't set error here, as we'll still try to fetch movies
+            }
+        };
+
         const fetchMovies = async () => {
             try {
                 const response = await fetch(`/.netlify/functions/get-session-movies?sessionId=${sessionId}`);
@@ -31,6 +47,7 @@ function Session() {
             }
         };
 
+        fetchSessionData();
         fetchMovies();
     }, [sessionId]);
 
@@ -67,7 +84,7 @@ function Session() {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1>Movie Voting Session</h1>
+                    <h1>{sessionData?.sessionName || 'Movie Voting Session'}</h1>
                     <p className="text-muted">Session ID: {sessionId}</p>
                 </div>
                 

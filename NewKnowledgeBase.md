@@ -4,6 +4,8 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 
 ## Architecture Insights
 
+- The application uses a modal dialog pattern for collecting required information before creating resources
+- Session names are stored in the FaunaDB database and displayed throughout the application for better user experience
 - The application uses React Context (AppModeContext) to manage global state for Host/Vote mode toggling
 - The Navbar component already includes functionality to switch between Host and Vote modes
 - FaunaDB is used as the database backend with serverless Netlify functions
@@ -18,7 +20,9 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 
 ## Technical Implementation Details
 
-- Sessions in FaunaDB have fields like startDate, status, hostId, and winningMovie
+- Sessions are sorted by date (newest first) for better user experience
+- Sessions in FaunaDB can now have a sessionName field for better identification
+- Form validation is implemented for required fields with visual feedback
 - The application uses React Router for navigation between different views
 - Bootstrap is used for basic styling with custom CSS for specific components
 - Netlify Functions are used to create a serverless backend API
@@ -30,6 +34,11 @@ This document contains insights and learnings about the Cinema Club Voting codeb
 
 ## Recent Learnings
 
+- Sorting data by recency (newest first) improves user experience by showing the most relevant content first
+- When adding new fields to database entities, ensure all API endpoints that return those entities include the new fields
+- Adding a modal dialog for session creation improves the user experience by collecting all required information upfront
+- Form validation with visual feedback helps users understand what information is required
+- Displaying meaningful names instead of IDs significantly improves the readability and usability of the application
 - FaunaDB date format may not always be compatible with JavaScript's Date constructor and requires conversion
 - Always validate date values before attempting to format them to prevent runtime errors
 - Some session fields (status, startDate) might be missing in older database records

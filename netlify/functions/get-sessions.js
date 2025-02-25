@@ -172,6 +172,8 @@ exports.handler = async (event, context) => {
                         
                         return {
                             id: session.id,
+                            // Include session name
+                            sessionName: session.sessionName || null,
                             // Try to convert date objects to strings
                             startDate: dateStr,
                             status: session.status || 'active',
@@ -183,6 +185,13 @@ exports.handler = async (event, context) => {
                         return null;
                     }
                 }).filter(Boolean); // Remove any null entries
+                
+                // Sort sessions by date (newest first)
+                sessions.sort((a, b) => {
+                    const dateA = new Date(a.startDate || 0);
+                    const dateB = new Date(b.startDate || 0);
+                    return dateB - dateA; // Descending order (newest first)
+                });
             } else {
                 console.log('Response missing data property:', result);
             }
