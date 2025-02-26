@@ -50,6 +50,7 @@ All notable changes to this project will be documented in this file.
 - Added deleteAllMovies function to the frontend API for bulk deletion
 - Added getSessionMovies function to the frontend API for fetching session-specific movies
 - Added test-update-movie.js script for debugging movie update functionality
+- Deployed latest version to Netlify at https://cinemaclub-ai.netlify.app
 
 ### Changed
 - Updated session lists to sort by date with newest sessions appearing first
@@ -146,6 +147,21 @@ All notable changes to this project will be documented in this file.
 - Fixed error handling in bulk deletion operations
 - Fixed inconsistent response formats across functions
 - Fixed updateMovie function in FaunaDB library by adding null-check operator to prevent errors when documents don't exist
+- Enhanced error handling in get-sessions.js Netlify function with more detailed error logging
+- Improved FaunaDB client initialization with better error handling and connection timeout
+- Enhanced Home.js component to display detailed error information in Host mode
+- Added CSS styling for error details display
+- Added environment variable validation in FaunaDB client initialization
+- Added more robust error handling in fetchSessions function
+- Added detailed error response parsing in Home component
+- Resolved 500 Internal Server Error in get-sessions Netlify function
+  - Enhanced error logging in Netlify functions for better debugging
+  - Improved FaunaDB client initialization with better error handling
+  - Added robust error handling for different FaunaDB response structures
+  - Updated Home component to display detailed error information
+  - Implemented comprehensive date handling for FaunaDB timestamps
+  - Fixed missing FAUNA_SECRET_KEY environment variable in Netlify production environment
+- Successfully deployed fixed version to Netlify production environment
 
 ### Removed
 - Removed monolithic movies.js Netlify function in favor of dedicated functions for each operation

@@ -12,6 +12,7 @@ function Home() {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [errorDetails, setErrorDetails] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [sessionName, setSessionName] = useState('');
     const [nameError, setNameError] = useState('');
@@ -24,6 +25,7 @@ function Home() {
     const fetchSessions = async () => {
         setLoading(true);
         setError(null);
+        setErrorDetails(null);
         try {
             console.log('Fetching sessions...');
             const response = await fetch('/.netlify/functions/get-sessions');
@@ -31,7 +33,17 @@ function Home() {
             console.log('Response status:', response.status);
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                
+                let errorObj;
+                try {
+                    errorObj = JSON.parse(errorText);
+                } catch (e) {
+                    errorObj = { message: errorText };
+                }
+                
+                throw new Error(`HTTP error! status: ${response.status}`, { cause: errorObj });
             }
             
             const text = await response.text(); // Get raw text first
@@ -63,6 +75,11 @@ function Home() {
         } catch (err) {
             console.error('Error fetching sessions:', err);
             setError(`${err.message}. Please try again later.`);
+            
+            // Store detailed error information for debugging
+            if (err.cause) {
+                setErrorDetails(err.cause);
+            }
         } finally {
             setLoading(false);
         }
@@ -174,6 +191,12 @@ function Home() {
             {error && (
                 <div className="error-container">
                     <p>{error}</p>
+                    {errorDetails && isHostMode && (
+                        <div className="error-details">
+                            <h4>Error Details (Debug):</h4>
+                            <pre>{JSON.stringify(errorDetails, null, 2)}</pre>
+                        </div>
+                    )}
                     <button onClick={handleRetry} className="retry-btn">
                         Retry
                     </button>
