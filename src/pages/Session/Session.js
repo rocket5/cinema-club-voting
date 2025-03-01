@@ -1,8 +1,8 @@
 // src/pages/Session.js
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { useAppMode } from '../context/AppModeContext';
-import MovieList from '../components/MovieList';
+import { useAppMode } from '../../context/AppModeContext';
+import MovieList from '../../components/MovieList/MovieList';
 import './Session.css';
 
 function Session() {

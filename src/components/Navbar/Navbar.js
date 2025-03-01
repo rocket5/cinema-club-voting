@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAppMode } from '../context/AppModeContext';
-import { useAuth } from '../context/AuthContext';
+import { useAppMode } from '../../context/AppModeContext';
+import { useAuth } from '../../context/AuthContext';
 
 function Navbar() {
   const location = useLocation();

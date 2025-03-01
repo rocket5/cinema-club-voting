@@ -1,8 +1,8 @@
 // src/pages/AddMovie.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import MovieSearch from '../components/MovieSearch';
-import MovieDetails from '../components/MovieDetails';
+import MovieSearch from '../../components/MovieSearch/MovieSearch';
+import MovieDetails from '../../components/MovieDetails/MovieDetails';
 import './AddMovie.css'; // Make sure this file exists
 
 function AddMovie() {

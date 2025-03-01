@@ -1,9 +1,9 @@
 // src/pages/Home.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppMode } from '../context/AppModeContext';
-import SessionsList from '../components/SessionsList';
-import DebugPanel from '../components/DebugPanel';
+import { useAppMode } from '../../context/AppModeContext';
+import SessionsList from '../../components/SessionsList/SessionsList';
+import DebugPanel from '../../components/DebugPanel/DebugPanel';
 import './Home.css';
 
 function Home() {

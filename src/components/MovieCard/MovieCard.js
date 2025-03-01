@@ -1,7 +1,7 @@
 // src/components/MovieCard.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import RankInput from './RankInput';
+import RankInput from '../RankInput/RankInput';
 
 function MovieCard({ 
   movie, 

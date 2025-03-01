@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getMovieById } from '../api/omdb';
+import { getMovieById } from '../../api/omdb';
 import './MovieDetails.css';
 
 function MovieDetails({ movieId, onBack, onDetailsLoaded }) {

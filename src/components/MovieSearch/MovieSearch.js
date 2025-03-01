@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { searchMovies } from '../api/omdb';
+import { searchMovies } from '../../api/omdb';
 import './MovieSearch.css';
 
 function MovieSearch({ onSelectMovie }) {

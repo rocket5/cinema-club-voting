@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import VoteButton from '../components/RankInput';
+import VoteButton from '../../components/RankInput/RankInput';
 import './MovieDetail.css';
 
 function MovieDetail() {

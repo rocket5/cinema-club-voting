@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase/client';
-import './Login.css'; // Reusing the same styles
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase/client';
+import '../Login/Login.css'; // Reusing the same styles
 
 function Signup() {
   const [email, setEmail] = useState('');
