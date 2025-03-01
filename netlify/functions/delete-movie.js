@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { deleteMovie } = require('../../src/lib/fauna/movies');
+const { deleteMovie } = require('../../src/lib/supabase/movies');
 
 exports.handler = async (event, context) => {
     console.log('Function delete-movie started');
@@ -23,7 +23,7 @@ exports.handler = async (event, context) => {
 
         console.log('Attempting to delete movie with ID:', id);
         
-        // Use the deleteMovie function from our FaunaDB library
+        // Use the deleteMovie function from our Supabase library
         const result = await deleteMovie(id);
         
         return {

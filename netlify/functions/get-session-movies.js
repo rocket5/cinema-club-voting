@@ -1,6 +1,6 @@
 // netlify/functions/get-session-movies.js
 require('dotenv').config();
-const { getMovies } = require('../../src/lib/fauna/movies');
+const { getMovies } = require('../../src/lib/supabase/movies');
 
 exports.handler = async (event, context) => {
     const sessionId = event.queryStringParameters.sessionId;
@@ -14,7 +14,7 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // Use the getMovies function from our FaunaDB library with sessionId filter
+        // Use the getMovies function from our Supabase library with sessionId filter
         const movies = await getMovies(sessionId);
         
         console.log('Movies retrieved:', movies);

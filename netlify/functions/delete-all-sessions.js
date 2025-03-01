@@ -1,6 +1,6 @@
 // netlify/functions/delete-all-sessions.js
 require('dotenv').config();
-const { deleteAllSessions } = require('../../src/lib/fauna/sessions');
+const { deleteAllSessions } = require('../../src/lib/supabase/sessions');
 
 exports.handler = async (event, context) => {
     // Only allow POST method for this endpoint
@@ -14,7 +14,7 @@ exports.handler = async (event, context) => {
     try {
         console.log('Starting bulk delete operation for all sessions');
         
-        // Use the deleteAllSessions function from our FaunaDB library
+        // Use the deleteAllSessions function from our Supabase library
         const result = await deleteAllSessions();
         
         return {

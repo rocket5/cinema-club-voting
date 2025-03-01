@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getSessions } = require('../../src/lib/fauna/sessions');
+const { getSessions } = require('../../src/lib/supabase/sessions');
 
 exports.handler = async (event, context) => {
     console.log('Function get-sessions started');
@@ -13,10 +13,11 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        console.log('Fetching sessions from FaunaDB...');
-        console.log('FAUNA_SECRET_KEY exists:', !!process.env.FAUNA_SECRET_KEY);
+        console.log('Fetching sessions from Supabase...');
+        console.log('REACT_APP_SUPABASE_URL exists:', !!process.env.REACT_APP_SUPABASE_URL);
+        console.log('REACT_APP_SUPABASE_ANON_KEY exists:', !!process.env.REACT_APP_SUPABASE_ANON_KEY);
         
-        // Use the getSessions function from our FaunaDB library
+        // Use the getSessions function from our Supabase library
         const sessions = await getSessions();
 
         console.log('Returning sessions:', sessions);

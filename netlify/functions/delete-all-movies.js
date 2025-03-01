@@ -1,6 +1,6 @@
 // netlify/functions/delete-all-movies.js
 require('dotenv').config();
-const { deleteAllMovies } = require('../../src/lib/fauna/movies');
+const { deleteAllMovies } = require('../../src/lib/supabase/movies');
 
 exports.handler = async (event, context) => {
     // Only allow POST method for this endpoint
@@ -14,7 +14,7 @@ exports.handler = async (event, context) => {
     try {
         console.log('Starting bulk delete operation for all movies');
         
-        // Use the deleteAllMovies function from our FaunaDB library
+        // Use the deleteAllMovies function from our Supabase library
         const result = await deleteAllMovies();
         
         return {

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { updateMovie } = require('../../src/lib/fauna/movies');
+const { updateMovie } = require('../../src/lib/supabase/movies');
 
 exports.handler = async (event, context) => {
     console.log('Function update-movie started');
@@ -51,7 +51,7 @@ exports.handler = async (event, context) => {
         if (genre) movieData.genre = genre;
         if (imdbRating) movieData.imdbRating = imdbRating;
         
-        // Use the updateMovie function from our FaunaDB library
+        // Use the updateMovie function from our Supabase library
         const result = await updateMovie(id, movieData);
         
         console.log('Movie updated successfully:', result);

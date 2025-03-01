@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppMode } from '../../context/AppModeContext';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase/client';
 import SessionsList from '../../components/SessionsList/SessionsList';
 import DebugPanel from '../../components/DebugPanel/DebugPanel';
 import './Home.css';
@@ -9,6 +11,7 @@ import './Home.css';
 function Home() {
     const navigate = useNavigate();
     const { isHostMode } = useAppMode();
+    const { user } = useAuth();
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -87,12 +90,31 @@ function Home() {
 
     const createSession = async () => {
         try {
+            setNameError('');
+            
             if (!sessionName.trim()) {
                 setNameError('Session name is required');
                 return;
             }
 
+            // Check if user is authenticated
+            if (!user) {
+                setError('You must be logged in to create a session');
+                return;
+            }
+
+            // Get the current session to extract the auth token
+            const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError || !sessionData?.session?.access_token) {
+                console.error('Error getting auth token:', sessionError);
+                setError('Authentication error. Please try logging in again.');
+                return;
+            }
+
+            const authToken = sessionData.session.access_token;
             console.log('Creating new session...');
+            
             const response = await fetch('/.netlify/functions/create-session', {
                 method: 'POST',
                 headers: {
@@ -100,7 +122,8 @@ function Home() {
                 },
                 body: JSON.stringify({
                     sessionName: sessionName,
-                    createdBy: 'host' // You might want to replace this with actual user ID if available
+                    createdBy: user.id, // Use the actual user ID
+                    authToken: authToken // Pass the auth token
                 })
             });
             
@@ -108,17 +131,23 @@ function Home() {
             const data = await response.json();
             console.log('Session creation response:', data);
 
-            if (data.sessionId) {
-                console.log('Navigating to session:', data.sessionId);
-                // Reset form state
-                setSessionName('');
-                setShowModal(false);
-                navigate(`/session/${data.sessionId}`);
-            } else {
-                console.error('No sessionId in response');
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to create session');
             }
-        } catch (error) {
-            console.error('Error creating session:', error);
+
+            // Close the modal and refresh sessions
+            setSessionName('');
+            setShowModal(false);
+            fetchSessions();
+            
+            // Navigate to the new session
+            if (data.sessionId) {
+                navigate(`/session/${data.sessionId}`);
+            }
+        } catch (err) {
+            console.error('Error creating session:', err);
+            setError('Failed to create session');
+            setErrorDetails(err.message);
         }
     };
 

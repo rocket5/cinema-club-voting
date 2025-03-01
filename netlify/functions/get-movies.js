@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getMovies } = require('../../src/lib/fauna/movies');
+const { getMovies } = require('../../src/lib/supabase/movies');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -38,7 +38,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Use the getMovies function from our FaunaDB library
+    // Use the getMovies function from our Supabase library
     const movies = await getMovies(sessionId);
 
     return {

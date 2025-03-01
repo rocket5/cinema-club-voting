@@ -1,6 +1,6 @@
 // netlify/functions/add-movie.js
 require('dotenv').config();
-const { createMovie } = require('../../src/lib/fauna/movies');
+const { createMovie } = require('../../src/lib/supabase/movies');
 
 exports.handler = async (event, context) => {
     console.log('Function add-movie started');
@@ -54,7 +54,7 @@ exports.handler = async (event, context) => {
         if (genre) movieData.genre = genre;
         if (imdbRating) movieData.imdbRating = imdbRating;
 
-        // Use the createMovie function from our FaunaDB library
+        // Use the createMovie function from our Supabase library
         const result = await createMovie(movieData);
 
         console.log('Movie created:', result);

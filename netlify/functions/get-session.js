@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getSessionById } = require('../../src/lib/fauna/sessions');
+const { getSessionById } = require('../../src/lib/supabase/sessions');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +37,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Use the getSessionById function from our FaunaDB library
+    // Use the getSessionById function from our Supabase library
     const session = await getSessionById(sessionId);
 
     return {

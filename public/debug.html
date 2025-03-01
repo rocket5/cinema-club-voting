@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Session Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select, textarea {
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            max-width: 100%;
+            height: 100px;
+            font-family: monospace;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .token-display {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .token-display h3 {
+            margin-top: 0;
+        }
+        .token-section {
+            margin-bottom: 10px;
+        }
+        .copy-btn {
+            background-color: #2196F3;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .button-blue {
+            background-color: #2196F3;
+        }
+        .button-blue:hover {
+            background-color: #0b7dda;
+        }
+        .button-orange {
+            background-color: #FF9800;
+        }
+        .button-orange:hover {
+            background-color: #e68a00;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Session Test</h1>
+    
+    <div class="tabs">
+        <div class="tab active" data-tab="login">Login</div>
+        <div class="tab" data-tab="signup">Signup</div>
+        <div class="tab" data-tab="token">Token</div>
+        <div class="tab" data-tab="supabase">Supabase</div>
+    </div>
+    
+    <div id="login-tab" class="tab-content active">
+        <h2>Login</h2>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter your password">
+        </div>
+        <button id="loginBtn">Login</button>
+    </div>
+    
+    <div id="signup-tab" class="tab-content">
+        <h2>Signup</h2>
+        <div class="form-group">
+            <label for="signupEmail">Email:</label>
+            <input type="email" id="signupEmail" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label for="signupPassword">Password:</label>
+            <input type="password" id="signupPassword" placeholder="Enter your password">
+        </div>
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="Enter your username">
+        </div>
+        <button id="signupBtn">Signup</button>
+    </div>
+    
+    <div id="token-tab" class="tab-content">
+        <h2>Auth Token</h2>
+        <div class="form-group">
+            <label for="customToken">Custom Token:</label>
+            <textarea id="customToken" placeholder="Paste a custom token here"></textarea>
+        </div>
+        <button id="useCustomTokenBtn">Use Custom Token</button>
+        <div class="token-display">
+            <h3>Current Token</h3>
+            <div class="token-section">
+                <strong>Status:</strong> <span id="tokenStatus">No token</span>
+            </div>
+            <div class="token-section">
+                <strong>Token:</strong> <span id="tokenValue">None</span>
+                <button id="copyTokenBtn" class="copy-btn">Copy</button>
+            </div>
+            <div class="token-section">
+                <strong>User ID:</strong> <span id="tokenUserId">None</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="supabase-tab" class="tab-content">
+        <h2>Supabase Connection</h2>
+        <div class="button-group">
+            <button id="checkSupabaseBtn" class="button-blue">Check Supabase Connection</button>
+            <button id="applySchemaBtn" class="button-orange">Apply Schema</button>
+        </div>
+        <div id="supabaseResult"></div>
+    </div>
+    
+    <div>
+        <h2>Authentication Status</h2>
+        <button id="logoutBtn">Logout</button>
+        <button id="checkAuthBtn">Check Auth</button>
+        <div id="authStatus">Not logged in</div>
+    </div>
+    
+    <div>
+        <h2>Debug Session</h2>
+        <div class="form-group">
+            <label for="tokenMethod">Send token as:</label>
+            <select id="tokenMethod">
+                <option value="query">Query Parameter</option>
+                <option value="header">Authorization Header</option>
+            </select>
+        </div>
+        <button id="debugBtn">Run Debug Session</button>
+        <div id="debugResult"></div>
+    </div>
+    
+    <script>
+        // Initialize variables
+        let authToken = null;
+        let userId = null;
+        
+        // Get DOM elements
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const checkAuthBtn = document.getElementById('checkAuthBtn');
+        const debugBtn = document.getElementById('debugBtn');
+        const useCustomTokenBtn = document.getElementById('useCustomTokenBtn');
+        const copyTokenBtn = document.getElementById('copyTokenBtn');
+        const checkSupabaseBtn = document.getElementById('checkSupabaseBtn');
+        const applySchemaBtn = document.getElementById('applySchemaBtn');
+        const authStatus = document.getElementById('authStatus');
+        const debugResult = document.getElementById('debugResult');
+        const supabaseResult = document.getElementById('supabaseResult');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const signupEmailInput = document.getElementById('signupEmail');
+        const signupPasswordInput = document.getElementById('signupPassword');
+        const usernameInput = document.getElementById('username');
+        const customTokenInput = document.getElementById('customToken');
+        const tokenMethod = document.getElementById('tokenMethod');
+        const tokenStatus = document.getElementById('tokenStatus');
+        const tokenValue = document.getElementById('tokenValue');
+        const tokenUserId = document.getElementById('tokenUserId');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to selected tab and content
+                tab.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+                
+                // Update token display if switching to token tab
+                if (tabId === 'token') {
+                    updateTokenDisplay();
+                }
+            });
+        });
+        
+        // Update token display
+        function updateTokenDisplay() {
+            if (authToken) {
+                tokenStatus.innerHTML = '<span class="success">Valid</span>';
+                tokenValue.textContent = authToken.substring(0, 20) + '...';
+                customTokenInput.value = authToken;
+                tokenUserId.textContent = userId || 'Unknown';
+            } else {
+                tokenStatus.innerHTML = '<span class="error">No token</span>';
+                tokenValue.textContent = 'None';
+                customTokenInput.value = '';
+                tokenUserId.textContent = 'None';
+            }
+        }
+        
+        // Copy token to clipboard
+        copyTokenBtn.addEventListener('click', () => {
+            if (authToken) {
+                navigator.clipboard.writeText(authToken).then(() => {
+                    alert('Token copied to clipboard');
+                }).catch(err => {
+                    console.error('Failed to copy token:', err);
+                    alert('Failed to copy token');
+                });
+            }
+        });
+        
+        // Use custom token
+        useCustomTokenBtn.addEventListener('click', () => {
+            const token = customTokenInput.value.trim();
+            if (token) {
+                authToken = token;
+                updateTokenDisplay();
+                checkAuth();
+            } else {
+                alert('Please enter a token');
+            }
+        });
+        
+        // Check Supabase connection
+        checkSupabaseBtn.addEventListener('click', async () => {
+            try {
+                supabaseResult.innerHTML = 'Checking Supabase connection...';
+                
+                let url = '/.netlify/functions/check-supabase';
+                const headers = {};
+                
+                if (authToken) {
+                    if (tokenMethod.value === 'query') {
+                        url += `?authToken=${encodeURIComponent(authToken)}`;
+                    } else {
+                        headers['Authorization'] = `Bearer ${authToken}`;
+                    }
+                }
+                
+                const response = await fetch(url, {
+                    headers: headers
+                });
+                const data = await response.json();
+                
+                supabaseResult.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                console.error('Supabase check error:', error);
+                supabaseResult.innerHTML = `<span class="error">Supabase check error: ${error.message}</span>`;
+            }
+        });
+        
+        // Apply schema
+        applySchemaBtn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to apply the schema? This will modify your database.')) {
+                try {
+                    supabaseResult.innerHTML = 'Applying schema...';
+                    
+                    const response = await fetch('/.netlify/functions/apply-schema', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                        }
+                    });
+                    const data = await response.json();
+                    
+                    supabaseResult.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } catch (error) {
+                    console.error('Schema application error:', error);
+                    supabaseResult.innerHTML = `<span class="error">Schema application error: ${error.message}</span>`;
+                }
+            }
+        });
+        
+        // Check if user is already logged in
+        async function checkAuth() {
+            try {
+                const headers = {};
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+                
+                authStatus.innerHTML = 'Checking authentication...';
+                
+                const response = await fetch('/.netlify/functions/check-auth', {
+                    headers: headers
+                });
+                const data = await response.json();
+                
+                if (data.authenticated && data.user) {
+                    authToken = data.session?.access_token;
+                    userId = data.user.id;
+                    authStatus.innerHTML = `<span class="success">Logged in as: ${data.user.email}</span>`;
+                    authStatus.innerHTML += `<br>User ID: ${userId}`;
+                    authStatus.innerHTML += `<br>Token: ${authToken ? authToken.substring(0, 10) + '...' : 'None'}`;
+                    updateTokenDisplay();
+                } else {
+                    authStatus.innerHTML = '<span class="error">Not logged in</span>';
+                    if (data.error) {
+                        authStatus.innerHTML += `<br>Error: ${data.error}`;
+                    }
+                    authToken = null;
+                    userId = null;
+                    updateTokenDisplay();
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+                authStatus.innerHTML = `<span class="error">Error checking auth: ${error.message}</span>`;
+            }
+        }
+        
+        // Login function
+        loginBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            if (!email || !password) {
+                authStatus.innerHTML = '<span class="error">Email and password are required</span>';
+                return;
+            }
+            
+            try {
+                authStatus.innerHTML = 'Logging in...';
+                
+                const response = await fetch('/.netlify/functions/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.user) {
+                    authToken = data.session?.access_token;
+                    userId = data.user.id;
+                    authStatus.innerHTML = `<span class="success">Logged in as: ${data.user.email}</span>`;
+                    authStatus.innerHTML += `<br>User ID: ${userId}`;
+                    authStatus.innerHTML += `<br>Token: ${authToken ? authToken.substring(0, 10) + '...' : 'None'}`;
+                    updateTokenDisplay();
+                } else {
+                    authStatus.innerHTML = `<span class="error">Login failed: ${data.error || 'Unknown error'}</span>`;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                authStatus.innerHTML = `<span class="error">Login error: ${error.message}</span>`;
+            }
+        });
+        
+        // Signup function
+        signupBtn.addEventListener('click', async () => {
+            const email = signupEmailInput.value;
+            const password = signupPasswordInput.value;
+            const username = usernameInput.value;
+            
+            if (!email || !password) {
+                authStatus.innerHTML = '<span class="error">Email and password are required</span>';
+                return;
+            }
+            
+            try {
+                authStatus.innerHTML = 'Signing up...';
+                
+                const userData = {
+                    username: username || email.split('@')[0]
+                };
+                
+                const response = await fetch('/.netlify/functions/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password, userData })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.user) {
+                    authToken = data.session?.access_token;
+                    userId = data.user.id;
+                    authStatus.innerHTML = `<span class="success">Signed up and logged in as: ${data.user.email}</span>`;
+                    authStatus.innerHTML += `<br>User ID: ${userId}`;
+                    authStatus.innerHTML += `<br>Token: ${authToken ? authToken.substring(0, 10) + '...' : 'None'}`;
+                    updateTokenDisplay();
+                    
+                    // Switch to login tab
+                    tabs[0].click();
+                } else {
+                    authStatus.innerHTML = `<span class="error">Signup failed: ${data.error || 'Unknown error'}</span>`;
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                authStatus.innerHTML = `<span class="error">Signup error: ${error.message}</span>`;
+            }
+        });
+        
+        // Logout function
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                authStatus.innerHTML = 'Logging out...';
+                
+                const headers = {};
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+                
+                const response = await fetch('/.netlify/functions/logout', {
+                    headers: headers
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authStatus.innerHTML = '<span class="success">Logged out successfully</span>';
+                    authToken = null;
+                    userId = null;
+                    updateTokenDisplay();
+                } else {
+                    authStatus.innerHTML = `<span class="error">Logout failed: ${data.error || 'Unknown error'}</span>`;
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                authStatus.innerHTML = `<span class="error">Logout error: ${error.message}</span>`;
+            }
+        });
+        
+        // Check auth button
+        checkAuthBtn.addEventListener('click', () => {
+            checkAuth();
+        });
+        
+        // Debug session function
+        debugBtn.addEventListener('click', async () => {
+            try {
+                debugResult.innerHTML = 'Running debug session...';
+                
+                let url = '/.netlify/functions/debug-session';
+                const headers = {};
+                
+                if (authToken) {
+                    if (tokenMethod.value === 'query') {
+                        url += `?authToken=${encodeURIComponent(authToken)}`;
+                    } else {
+                        headers['Authorization'] = `Bearer ${authToken}`;
+                    }
+                }
+                
+                const response = await fetch(url, {
+                    headers: headers
+                });
+                const data = await response.json();
+                
+                debugResult.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                console.error('Debug error:', error);
+                debugResult.innerHTML = `<span class="error">Debug error: ${error.message}</span>`;
+            }
+        });
+        
+        // Check auth on page load
+        checkAuth();
+    </script>
+</body>
+</html> 

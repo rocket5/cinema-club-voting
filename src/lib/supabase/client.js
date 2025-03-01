@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 
 // Get environment variables
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -112,98 +112,100 @@ try {
   });
   
   // Add a global method to check auth state from anywhere
-  window.checkSupabaseAuth = async () => {
-    console.log('Manual auth check triggered');
-    if (supabase && supabase.auth) {
-      try {
-        return await supabase.auth.debugSession();
-      } catch (err) {
-        console.error('Error during manual auth check:', err);
-        return { error: 'Error checking auth state' };
-      }
-    } else {
-      console.error('Supabase client not available');
-      return { error: 'Client not available' };
-    }
-  };
-  
-  // Add a global emergency logout method
-  window.emergencyLogout = async () => {
-    console.log('Emergency logout triggered');
-    
-    try {
-      // Try the regular signOut first, but with a timeout to prevent hanging
+  if (typeof window !== 'undefined') {
+    window.checkSupabaseAuth = async () => {
+      console.log('Manual auth check triggered');
       if (supabase && supabase.auth) {
         try {
-          console.log('Attempting regular signOut...');
-          
-          // Create a promise that times out after 2 seconds
-          const signOutWithTimeout = Promise.race([
-            originalSignOut(),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('SignOut timeout')), 2000)
-            )
-          ]);
-          
+          return await supabase.auth.debugSession();
+        } catch (err) {
+          console.error('Error during manual auth check:', err);
+          return { error: 'Error checking auth state' };
+        }
+      } else {
+        console.error('Supabase client not available');
+        return { error: 'Client not available' };
+      }
+    };
+    
+    // Add a global emergency logout method
+    window.emergencyLogout = async () => {
+      console.log('Emergency logout triggered');
+      
+      try {
+        // Try the regular signOut first, but with a timeout to prevent hanging
+        if (supabase && supabase.auth) {
           try {
-            const result = await signOutWithTimeout;
-            console.log('Regular signOut result:', result);
-          } catch (timeoutError) {
-            console.error('SignOut timed out:', timeoutError);
+            console.log('Attempting regular signOut...');
+            
+            // Create a promise that times out after 2 seconds
+            const signOutWithTimeout = Promise.race([
+              originalSignOut(),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('SignOut timeout')), 2000)
+              )
+            ]);
+            
+            try {
+              const result = await signOutWithTimeout;
+              console.log('Regular signOut result:', result);
+            } catch (timeoutError) {
+              console.error('SignOut timed out:', timeoutError);
+              // Continue with forced logout
+            }
+          } catch (error) {
+            console.error('Regular signOut failed:', error);
             // Continue with forced logout
           }
-        } catch (error) {
-          console.error('Regular signOut failed:', error);
-          // Continue with forced logout
         }
+        
+        // Force clear all Supabase-related localStorage items
+        console.log('Clearing Supabase localStorage items...');
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-') || key.includes('supabase')) {
+            console.log(`Removing localStorage item: ${key}`);
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Clear session storage as well
+        console.log('Clearing sessionStorage...');
+        sessionStorage.clear();
+        
+        // Force clear all cookies
+        console.log('Clearing cookies...');
+        document.cookie.split(';').forEach(cookie => {
+          const [name] = cookie.trim().split('=');
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        });
+        
+        console.log('Auth state forcefully cleared');
+        
+        // Redirect to login page
+        console.log('Redirecting to login page...');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
+        
+        return { success: true, message: 'Emergency logout completed' };
+      } catch (error) {
+        console.error('Emergency logout error:', error);
+        
+        // Even if there's an error, try to redirect
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
+        
+        return { success: false, error };
       }
-      
-      // Force clear all Supabase-related localStorage items
-      console.log('Clearing Supabase localStorage items...');
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('sb-') || key.includes('supabase')) {
-          console.log(`Removing localStorage item: ${key}`);
-          localStorage.removeItem(key);
-        }
-      });
-      
-      // Clear session storage as well
-      console.log('Clearing sessionStorage...');
-      sessionStorage.clear();
-      
-      // Force clear all cookies
-      console.log('Clearing cookies...');
-      document.cookie.split(';').forEach(cookie => {
-        const [name] = cookie.trim().split('=');
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      });
-      
-      console.log('Auth state forcefully cleared');
-      
-      // Redirect to login page
-      console.log('Redirecting to login page...');
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 100);
-      
-      return { success: true, message: 'Emergency logout completed' };
-    } catch (error) {
-      console.error('Emergency logout error:', error);
-      
-      // Even if there's an error, try to redirect
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 100);
-      
-      return { success: false, error };
-    }
-  };
-  
-  // Add a force reload method
-  window.forceReload = () => {
-    console.log('Force reloading page...');
-    window.location.reload(true);
-  };
+    };
+    
+    // Add a force reload method
+    window.forceReload = () => {
+      console.log('Force reloading page...');
+      window.location.reload(true);
+    };
+  }
   
 } catch (error) {
   console.error('Error initializing Supabase client:', error);
@@ -238,4 +240,4 @@ try {
   };
 }
 
-export { supabase };
+module.exports = { supabase };

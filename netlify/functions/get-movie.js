@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getMovieById } = require('../../src/lib/fauna/movies');
+const { getMovieById } = require('../../src/lib/supabase/movies');
 
 exports.handler = async (event, context) => {
     console.log('Function get-movie started');
@@ -23,7 +23,7 @@ exports.handler = async (event, context) => {
 
         console.log('Fetching movie with ID:', id);
 
-        // Use the getMovieById function from our FaunaDB library
+        // Use the getMovieById function from our Supabase library
         const movie = await getMovieById(id);
 
         console.log('Movie fetched:', movie);

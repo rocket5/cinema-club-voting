@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { createSession } = require('../../src/lib/fauna/sessions');
+const { createSession } = require('../../src/lib/supabase/sessions');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -46,7 +46,7 @@ exports.handler = async (event) => {
       startDate: new Date().toISOString()
     };
 
-    // Use the createSession function from our FaunaDB library
+    // Use the createSession function from our Supabase library
     const result = await createSession(sessionData);
 
     return {
