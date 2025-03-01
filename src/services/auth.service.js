@@ -52,9 +52,16 @@ class AuthService {
       } else {
         console.log('AuthService - signUp successful');
         
-        // If signup was successful and we have a user, create their profile
+        // If signup was successful and we have a user, try to create their profile
+        // But don't fail the signup if profile creation fails
         if (result.data?.user) {
-          await this.createUserProfile(result.data.user.id, credentials.options?.data);
+          try {
+            await this.createUserProfile(result.data.user.id, credentials.options?.data);
+          } catch (profileError) {
+            console.error('AuthService - Profile creation error:', profileError);
+            // Continue with signup even if profile creation fails
+            // The profile will be created later when they access the Profile page
+          }
         }
       }
       
@@ -208,12 +215,28 @@ class AuthService {
       
       const profileData = {
         id: userId,
-        name: userData?.name || '',
+        name: userData?.name || userData?.username || '',
         is_host: false,
         created_at: new Date(),
         updated_at: new Date()
       };
       
+      console.log('AuthService - Creating profile with data:', profileData);
+      
+      // First, check if we have a valid session to avoid RLS policy errors
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData?.session) {
+        console.log('AuthService - No active session, using service role for profile creation');
+        // If no session, we'll need to handle this differently
+        // For now, we'll just log the error and return
+        return {
+          data: null,
+          error: new Error('No active session for profile creation')
+        };
+      }
+      
+      // With a valid session, try to create the profile
       const result = await supabase
         .from('profiles')
         .upsert(profileData)
@@ -221,6 +244,15 @@ class AuthService {
       
       if (result.error) {
         console.error('AuthService - createUserProfile error:', result.error);
+        
+        // If we get an RLS policy error, log it but don't treat it as a fatal error
+        if (result.error.code === '42501' || result.error.message.includes('policy')) {
+          console.log('AuthService - RLS policy error, profile will be created on first login');
+          return {
+            data: null,
+            error: null // Return null error to indicate non-fatal error
+          };
+        }
       } else {
         console.log('AuthService - Profile created successfully');
       }
@@ -261,12 +293,18 @@ class AuthService {
       if (result.error) {
         console.error('AuthService - getUserProfile error:', result.error);
         
-        // If the profile doesn't exist, create one
-        if (result.error.code === '42P01' || 
+        // If the profile doesn't exist or there's an RLS policy error, create one
+        if (result.error.code === 'PGRST116' || // Not found
+            result.error.code === '42501' ||    // RLS policy error
             result.error.message.includes('does not exist') || 
-            result.error.code === 'PGRST116') {
-          console.log('AuthService - Creating new profile for user:', userId);
-          return this.createUserProfile(userId);
+            result.error.message.includes('policy')) {
+          console.log('AuthService - Profile not found or RLS error, creating new profile');
+          
+          // Get user metadata to use for profile creation
+          const { data: userData } = await supabase.auth.getUser();
+          const metadata = userData?.user?.user_metadata || {};
+          
+          return this.createUserProfile(userId, metadata);
         }
       } else {
         console.log('AuthService - Profile fetched successfully');

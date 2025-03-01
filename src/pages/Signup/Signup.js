@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase/client';
+import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
 import '../Login/Login.css'; // Reusing the same styles
 
 function Signup() {
@@ -10,21 +10,21 @@ function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    setMessage('');
-    setLoading(true);
+    
+    // Show loading spinner immediately
+    setIsSubmitting(true);
     
     // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
     
@@ -35,49 +35,30 @@ function Signup() {
         password,
         options: {
           data: {
-            username: username // Store username in auth metadata
+            username: username,
+            name: username // Also store name for profile creation
           }
         }
       });
       
       if (error) throw error;
       
-      // Create a profile for the user
-      if (data?.user) {
-        try {
-          console.log('Creating profile for new user:', data.user.id);
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .upsert({
-              id: data.user.id,
-              name: username, // Set the name field to the username
-              is_host: false,
-              created_at: new Date(),
-              updated_at: new Date()
-            });
-          
-          if (profileError) {
-            console.error('Error creating profile:', profileError);
-            // Continue with signup even if profile creation fails
-            // The profile will be created later when they access the Profile page
-          } else {
-            console.log('Profile created successfully');
-          }
-        } catch (profileError) {
-          console.error('Exception creating profile:', profileError);
-          // Continue with signup even if profile creation fails
-        }
-      }
+      // The profile creation is now handled in the auth.service.js createUserProfile method
+      // No need to create the profile here
       
-      setMessage('Registration successful! Please check your email for confirmation.');
-      setTimeout(() => navigate('/login'), 5000);
+      // Redirect to email confirmation page
+      navigate('/email-confirmation');
     } catch (error) {
       console.error('Signup error:', error);
       setError(error.message || 'Failed to sign up');
-    } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
+
+  // If form is submitting, show loading spinner
+  if (isSubmitting) {
+    return <LoadingSpinner message="Creating your account..." />;
+  }
 
   return (
     <div className="auth-container">
@@ -90,12 +71,6 @@ function Signup() {
           </div>
         )}
         
-        {message && (
-          <div className="success-message">
-            {message}
-          </div>
-        )}
-        
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -105,7 +80,6 @@ function Signup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={loading}
             />
           </div>
           
@@ -117,7 +91,6 @@ function Signup() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              disabled={loading}
               minLength="3"
               maxLength="30"
             />
@@ -134,7 +107,6 @@ function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={loading}
               minLength="6"
             />
           </div>
@@ -147,7 +119,6 @@ function Signup() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              disabled={loading}
               minLength="6"
             />
           </div>
@@ -155,9 +126,8 @@ function Signup() {
           <button 
             type="submit" 
             className="auth-button"
-            disabled={loading}
           >
-            {loading ? 'Signing up...' : 'Sign Up'}
+            Sign Up
           </button>
         </form>
         

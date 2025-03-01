@@ -7,6 +7,7 @@ import MovieDetail from './pages/MovieDetail/MovieDetail';
 import Session from './pages/Session/Session';
 import Login from './pages/Login/Login';
 import Signup from './pages/Signup/Signup';
+import EmailConfirmation from './pages/EmailConfirmation/EmailConfirmation';
 import Profile from './pages/Profile/Profile';
 import ProtectedRoute from './routes/ProtectedRoute';
 import ProtectedHostRoute from './routes/ProtectedHostRoute';
@@ -26,6 +27,7 @@ function App() {
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/email-confirmation" element={<EmailConfirmation />} />
                 
                 {/* Protected routes */}
                 <Route 

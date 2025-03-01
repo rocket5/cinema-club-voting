@@ -1,0 +1,104 @@
+.email-confirmation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f5f7fa;
+}
+
+.email-confirmation-card {
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.email-icon {
+  font-size: 48px;
+  color: #3498db;
+  margin-bottom: 20px;
+}
+
+.email-confirmation-card h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.confirmation-message {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: #34495e;
+}
+
+.instructions {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  color: #7f8c8d;
+}
+
+.what-next {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.what-next h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.what-next ul {
+  padding-left: 20px;
+}
+
+.what-next li {
+  margin-bottom: 10px;
+  color: #34495e;
+}
+
+.action-links {
+  margin-top: 20px;
+}
+
+.login-link {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.login-link:hover {
+  background-color: #2980b9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .email-confirmation-card {
+    padding: 30px 20px;
+  }
+  
+  .email-icon {
+    font-size: 40px;
+  }
+  
+  .email-confirmation-card h2 {
+    font-size: 24px;
+  }
+  
+  .confirmation-message {
+    font-size: 16px;
+  }
+} 
