@@ -51,6 +51,53 @@ All notable changes to this project will be documented in this file.
 - Added getSessionMovies function to the frontend API for fetching session-specific movies
 - Added test-update-movie.js script for debugging movie update functionality
 - Deployed latest version to Netlify at https://cinemaclub-ai.netlify.app
+- Added Supabase integration for authentication and database operations
+- Added Row-Level Security (RLS) policies for Supabase tables
+- Added AuthContext for managing user authentication state
+- Added ProtectedRoute component for route protection based on authentication status
+- Added HostRoute component for host-specific route protection
+- Added Login page with email/password authentication
+- Added Signup page for user registration
+- Added Profile page for viewing and updating user information
+- Added host mode toggle functionality in the Profile page
+- Added authentication-related UI components in the Navbar
+- Added CSS styling for authentication pages and components
+- FaunaDB library functions for better code organization
+- Unit tests for critical functions
+- Session management enhancements
+- Authentication components using Supabase
+- User profile management system with host mode toggle
+- Profiles table in Supabase with automatic creation for new users
+- Username requirement for host mode to ensure session creator identification
+- Logout button in the navigation bar for quick access to sign out
+- Comprehensive debugging tools for authentication troubleshooting
+- Emergency logout function accessible from browser console
+- Debug information panel in Profile component
+- Enhanced console logging throughout authentication flow
+- Force logout functionality that clears localStorage and sessionStorage
+- Multiple fallback strategies for logout to ensure users can always sign out
+- Force page reload function for authentication recovery
+- Username field in signup form for immediate profile creation
+- Login timeout detection to identify stuck authentication attempts
+- Emergency reset button in Login page for recovering from stuck states
+- Debug options panel in Login page with auth state checking and reset functions
+- Enhanced error handling in authentication process with detailed logging
+- Improved Promise handling in Supabase client to prevent unhandled rejections
+- Created AuthService class to encapsulate all Supabase authentication-related operations
+  - Added methods for signIn, signUp, signOut, getSession, onAuthStateChange
+  - Added profile management methods (createUserProfile, getUserProfile, updateUserProfile)
+  - Added emergency reset and cleanup methods for recovery
+  - Added timeout handling for all operations
+- Added comprehensive test suite for authentication
+  - Created unit tests for all AuthService methods
+  - Created integration tests for login process with various scenarios
+  - Added test scripts for manual testing of Supabase authentication
+  - Added detailed README with instructions for running tests
+- Added extensive documentation for authentication testing and debugging
+  - Created test structure documentation
+  - Added instructions for running unit and integration tests
+  - Added guidelines for setting up test credentials
+  - Added troubleshooting checklist for common authentication issues
 
 ### Changed
 - Updated session lists to sort by date with newest sessions appearing first
@@ -105,6 +152,30 @@ All notable changes to this project will be documented in this file.
 - Updated frontend API code to use the new dedicated Netlify functions instead of the monolithic movies.js function
 - Enhanced frontend API error handling with more detailed error messages
 - Improved frontend API response parsing to handle different response structures
+- Updated App.js to include authentication routes and wrap the app with AuthProvider
+- Updated Navbar component to include authentication-related links and user profile access
+- Session lists now show most recent sessions first
+- Improved UI for voting interface
+- Modified authentication flow for better user experience
+- Enhanced error handling in profile management
+- Simplified user profile to focus on essential information (username)
+- Improved validation for host mode to require username
+- Enhanced signOut function to explicitly clear user state
+- Improved Profile component with retry functionality and better error handling
+- Added detailed logging to Supabase client for better debugging
+- Enhanced logout process with multiple fallback strategies
+- Improved emergency logout with aggressive storage clearing
+- Updated signup process to create user profile during registration
+- Added validation for username field with minimum and maximum length requirements
+- Enhanced Login component with timeout detection and emergency reset functionality
+- Improved Supabase client implementation with better Promise handling
+- Enhanced signInWithPassword method to properly handle errors and return structured responses
+- Updated AuthContext with better error tracking and explicit state management
+- Improved authentication state change handling with better error recovery
+- Refactored authentication logic to follow the Single Responsibility Principle
+- Moved all Supabase authentication operations to a dedicated service layer
+- Enhanced test documentation with clear instructions for debugging authentication issues
+- Improved test structure with separate directories for unit tests, integration tests, and service tests
 
 ### Fixed
 - Fixed missing session names in get-sessions API response
@@ -162,17 +233,51 @@ All notable changes to this project will be documented in this file.
   - Implemented comprehensive date handling for FaunaDB timestamps
   - Fixed missing FAUNA_SECRET_KEY environment variable in Netlify production environment
 - Successfully deployed fixed version to Netlify production environment
+- Session names now properly update in the UI
+- Date formatting issues in session display
+- Error handling for missing profile data
+- Profile creation for new users
+- Automatic profile creation when profiles table exists but user record doesn't
+- Improved authentication state management to prevent loading spinner issues
+- Added fallback UI for authentication loading states
+- Fixed Supabase auth method overriding that caused onAuthStateChange to be unavailable
+- Preserved original Supabase auth methods when adding debugging functionality
+- Fixed logout functionality by using safer method extension approach
+- Added emergency logout option to recover from authentication issues
+- Improved error handling during logout process
+- Enhanced logout functionality with localStorage and sessionStorage clearing
+- Fixed stuck authentication states with force logout options
+- Fixed login process getting stuck with unhandled Promise rejections
+- Added timeout detection to identify and recover from stuck login attempts
+- Improved error handling in signInWithPassword to prevent unhandled rejections
+- Enhanced AuthContext to track and expose authentication errors
+- Fixed potential memory leaks in auth state change subscription handling
+- Improved error recovery in authentication state initialization
+- Added proper cleanup for auth state change listeners
+- Fixed Profile page stuck loading issue with timeout protection
+- Added retry functionality and better error handling for Profile page
+- Added loading state styling for Profile page to improve user experience
+- Enhanced Profile component to handle authentication errors gracefully
 
 ### Removed
 - Removed monolithic movies.js Netlify function in favor of dedicated functions for each operation
+- Bio field from user profile to simplify the interface
 
 ### Security
 - Improved input validation in all refactored functions
+- Added Row-Level Security (RLS) policies for Supabase tables to ensure data access control
+- Implemented protected routes to restrict access to authenticated users
+- Added host-specific route protection for administrative features
+- Enhanced input validation
+- Implemented Row-Level Security (RLS) policies for Supabase tables
+- Added proper authentication checks for protected routes
+- Improved authentication state cleanup during logout
 
-## [0.1.0] - 2023-04-15
+## [1.0.0] - 2023-06-15
 
 ### Added
 - Initial release
-- Basic movie voting functionality
+- Movie voting functionality
 - Session management
-- FaunaDB integration 
+- Basic authentication
+- Deployed to Netlify 

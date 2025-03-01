@@ -2,94 +2,152 @@
 
 This file documents new insights and knowledge gained about the Cinema Club Voting codebase.
 
-## Netlify Deployment
+## Supabase Integration
 
-- The project is configured for Netlify deployment with a netlify.toml file in the root directory
-- The build command is set to "npm run build" and the publish directory is "build"
-- Netlify functions are stored in the "netlify/functions" directory
-- The project uses redirects to handle client-side routing with React Router
-- The site is deployed at https://cinemaclub-ai.netlify.app
-- Deployment can be done using the Netlify CLI with the command "netlify deploy --prod"
-- It's important to run "npm run build" before deploying to ensure the latest changes are included
-- After updating environment variables in the Netlify dashboard, a redeployment is required for the changes to take effect
-- Environment variables can be set using the Netlify CLI with `netlify env:set KEY VALUE` or through the Netlify dashboard
-- To check existing environment variables, use `netlify env:list` (values are hidden by default)
-- Environment variables set in the Netlify dashboard are not automatically applied to functions until redeployment
+- The project is being migrated from FaunaDB to Supabase for database and authentication
+- Supabase provides both database and authentication services in a single platform
+- Row-Level Security (RLS) policies are used to control access to data in Supabase
+- RLS policies can be defined at the table level to restrict access based on user roles
+- Supabase allows for flexible role management through custom user metadata
+- The `is_host` flag in the profiles table is used to determine if a user has host privileges
+- Supabase client is initialized with project URL and anon key from environment variables
+- Authentication state is managed through the Supabase Auth API
+- User profiles are stored in a separate profiles table linked to auth.users
+- The profiles table includes fields for name, bio, and host status
+- Supabase triggers can be used to automatically create profile records when users sign up
+- The Supabase client provides methods for authentication (signUp, signIn, signOut)
+- User session state is persisted in local storage by the Supabase client
+- The AuthContext provides a centralized way to access authentication state throughout the app
+- Protected routes can be implemented using the authentication state from AuthContext
+- Host-specific routes can be protected based on the user's host status
+- Migration from FaunaDB to Supabase requires careful planning of database schema and authentication flow
+- Row-Level Security (RLS) policies in Supabase provide fine-grained access control at the database level
+- User role management can be implemented using a profiles table with an is_host boolean field
+- Supabase triggers can automatically create user profiles when new users sign up
+- Error handling for database operations should account for table existence and record existence
+- The Supabase client needs proper initialization with URL and anon key from environment variables
+- Authentication state management is handled through the Supabase Auth API
+- Username is required for host mode to ensure session creator identification
+- Explicitly clearing user state during logout helps prevent stale authentication states
+- Overriding Supabase auth methods with custom implementations allows for better debugging and error handling
+- Adding a debug method to the Supabase client helps diagnose authentication issues
+- When extending Supabase client methods for debugging, it's crucial to preserve all original methods
+- Replacing the entire auth object can break functionality like onAuthStateChange
+- Method-by-method extension is safer than replacing the entire object
+- Adding new methods with different names (e.g., debugSignOut) is safer than overriding existing methods
+- Preserving the original method references ensures core functionality remains intact
+- Supabase stores authentication state in localStorage with keys prefixed with 'sb-'
+- When regular logout fails, clearing localStorage and sessionStorage can force authentication state reset
+- Multiple fallback strategies for logout ensure users can always sign out
+- Force page reload can help recover from stuck authentication states
+- Creating user profiles during signup improves the user experience by eliminating the need for a separate profile creation step
+- Storing username in both auth metadata and the profiles table provides redundancy and flexibility
+- Unhandled Promise rejections in authentication methods can cause the login process to get stuck
+- Wrapping authentication methods with proper error handling prevents unhandled rejections
+- Implementing timeout detection for login attempts helps identify and recover from stuck states
+- Providing emergency reset options in the login UI improves user experience during authentication issues
+- Tracking authentication errors in the AuthContext allows for better error reporting and recovery
+- Proper cleanup of auth state change listeners prevents memory leaks and unexpected behavior
 
-## Debugging Netlify Function 500 Errors
+## Authentication Implementation
 
-- 500 Internal Server Errors in Netlify functions can be difficult to debug without proper error logging
-- Adding detailed console.log statements in Netlify functions helps identify issues in the deployed environment
-- Logging environment variable existence (without exposing values) helps identify missing configuration
-- Including error.stack and JSON.stringify(error, Object.getOwnPropertyNames(error)) provides comprehensive error details
-- Returning detailed error information in the response body helps with client-side debugging
-- Implementing a retry mechanism in the frontend improves user experience when temporary errors occur
-- Checking Netlify function logs in the Netlify dashboard (https://app.netlify.com/sites/[site-name]/logs/functions) is essential for debugging
-- Environment variables must be set in the Netlify dashboard for the production environment
-- Local development may work while production fails if environment variables are missing in Netlify
-- The error message "Access token required" in FaunaDB operations typically indicates a missing or invalid FAUNA_SECRET_KEY
-- When environment variables are updated in Netlify, a redeployment is necessary for the changes to take effect
-- The curl command with verbose output (`curl -v`) is an excellent tool for testing API endpoints and diagnosing issues
-- HTTP 500 errors with detailed error messages in the response body make debugging much easier than generic error pages
-- Comparing local environment variables with production environment variables can help identify configuration discrepancies
-- Using the same environment variable names in both local development and production ensures consistent behavior
+- The application uses a context-based authentication system with React Context API
+- AuthContext provides authentication state and methods to the entire application
+- The useAuth hook simplifies access to authentication state and methods
+- Authentication state includes the current user object and loading status
+- Protected routes redirect unauthenticated users to the login page
+- Host routes check both authentication status and host privileges
+- The Login page handles user authentication with email and password
+- The Signup page handles user registration with email and password
+- The Profile page allows users to view and update their profile information
+- Users can toggle between host and regular user modes in their profile
+- Authentication-related UI components are conditionally rendered based on auth state
+- The Navbar displays different links based on authentication status
+- CSS styles for authentication pages use a consistent design language
+- Form validation is implemented for login and signup forms
+- Error handling is implemented for authentication operations
+- Loading states are displayed during authentication operations
+- Success messages are displayed after successful operations
+- Context-based authentication system using React Context API provides global access to auth state
+- Protected routes can be implemented using wrapper components that check authentication status
+- User profiles should be created automatically upon registration to avoid errors
+- Error handling for missing profile data is crucial for a smooth user experience
+- Profile data should be fetched after authentication and stored in state for use across components
+- Validation for required fields should be implemented at both UI and database levels
+- Conditional UI elements can guide users to complete required profile information
+- Providing multiple logout options (navbar and profile page) improves user experience
+- Proper cleanup of authentication state during logout prevents UI inconsistencies
+- Comprehensive logging throughout the authentication flow helps identify issues
+- Emergency logout functions provide a way to recover from stuck states
+- Tracking authentication state changes with console logs helps diagnose timing issues
+- Adding retry functionality for profile fetching improves resilience
+- The onAuthStateChange listener is essential for keeping the application in sync with auth state
+- Preserving the original onAuthStateChange method is critical for proper authentication flow
+- Implementing emergency logout options helps users recover from stuck authentication states
+- Adding fallback navigation to login page ensures users can always reset their session
+- Aggressive logout strategies that clear localStorage and sessionStorage can resolve persistent authentication issues
+- Implementing multiple layers of fallback for logout operations ensures reliability
+- Using window.location.href for navigation during logout is more reliable than React Router's navigate
+- Force page reload can help clear memory state when other logout methods fail
+- Collecting username during signup simplifies the onboarding process and ensures users have a complete profile from the start
+- Validating username length during signup prevents issues with too short or too long usernames
+- Providing clear instructions about username visibility helps users make informed decisions
+- Implementing timeout detection for login attempts helps identify and recover from stuck states
+- Adding emergency reset buttons in the login UI improves user experience during authentication issues
+- Tracking authentication errors in the AuthContext allows for better error reporting and recovery
+- Proper cleanup of auth state change listeners prevents memory leaks and unexpected behavior
+- Wrapping authentication methods with proper error handling prevents unhandled rejections
 
-## FaunaDB Integration
+## React Router Integration
 
-- The project uses FaunaDB as its database solution
-- FaunaDB client is initialized in Netlify functions using environment variables for the secret key
-- The database schema includes collections for Movies, Sessions, and Votes
-- FaunaDB Query Language (FQL) is used for database operations
-- Netlify functions serve as the API layer between the frontend and FaunaDB
-- The project uses the newer `fauna` package instead of the older `faunadb` package
-- Error handling is implemented consistently across database operations with detailed error messages
-- Timestamps are automatically added to records for created and updated operations
-- FaunaDB requires the use of the null-check operator (`!`) when deleting documents to prevent errors when the document doesn't exist
-- Collection names in FaunaDB queries must be consistent and match the actual collection names in the database (e.g., `movies`, `sessions`, `votes` instead of `Movie`, `Session`, `Vote`)
-- FaunaDB's document IDs are strings, not numbers, and must be handled accordingly when performing operations
-- Centralizing FaunaDB operations in a dedicated library significantly simplifies Netlify functions and improves code maintainability
-- Using a centralized FaunaDB library reduces code duplication and ensures consistent error handling across all database operations
-- Refactoring Netlify functions to use a centralized library makes the codebase more maintainable and easier to update
-- The FaunaDB library pattern with separate modules for different entities (movies, sessions, votes) provides a clean separation of concerns
+- Protected routes are implemented using React Router's component composition
+- The ProtectedRoute component wraps routes that require authentication
+- The HostRoute component wraps routes that require host privileges
+- Route protection is implemented by checking auth state and redirecting if necessary
+- The useNavigate hook is used for programmatic navigation after authentication events
+- The useLocation hook is used to determine the current route for UI highlighting
+- Public routes (login, signup) are accessible without authentication
+- All other routes are protected and require authentication
+- Protected routes can be implemented as wrapper components around Route components
+- Navigation handling after authentication events (login, logout) improves user experience
+- Role-based route protection can be implemented by checking user attributes
+- Programmatic navigation after logout ensures users are redirected to appropriate pages
+- Fallback navigation options help users recover from stuck states
+- Using window.location.href for navigation during logout is more reliable than React Router's navigate
+- Force page reload can help clear memory state when other logout methods fail
+- Redirecting to the login page after detecting a stuck login attempt helps users recover
 
-## API Architecture
+## User Experience Improvements
 
-- The project uses Netlify functions as serverless API endpoints
-- Each API endpoint is implemented as a separate function in the `netlify/functions` directory
-- The frontend communicates with these endpoints using the Fetch API
-- API endpoints follow RESTful principles with appropriate HTTP methods (GET, POST, PUT, DELETE)
-- Error handling is implemented consistently across all API endpoints
-- Response formats are standardized across all API endpoints
-- The frontend API code is centralized in dedicated modules (e.g., `src/api/movies.js`, `src/api/sessions.js`)
-- Replacing monolithic API endpoints with dedicated functions for specific operations improves maintainability and testability
-- Dedicated API functions are easier to understand, test, and maintain than monolithic functions that handle multiple operations
-- Frontend API modules abstract away the details of API communication, making it easier to change the underlying implementation
-- Enhanced error handling in frontend API modules improves the user experience by providing more detailed error messages
-- Consistent response parsing in frontend API modules ensures that the frontend always receives data in the expected format
-
-## Bulk Operations
-
-- Bulk operations (like deleting all movies or sessions) are implemented using a two-phase approach:
-  1. First attempt a bulk delete operation using FaunaDB's `forEach` method
-  2. If that fails, fall back to deleting items one by one
-- This approach ensures that bulk operations are as efficient as possible while still being reliable
-- Bulk operations return detailed results, including success/failure status for each item
-- Centralizing bulk operation logic in the FaunaDB library simplifies the Netlify functions that expose these operations
-- Bulk operations are exposed through dedicated API endpoints (`delete-all-movies`, `delete-all-sessions`)
-- The frontend API provides dedicated functions for bulk operations, making them easy to use from the frontend
-
-## Refactoring Insights
-
-- Refactoring monolithic functions into dedicated functions for each operation significantly improves code maintainability
-- Centralizing database operations in a dedicated library reduces code duplication and ensures consistent error handling
-- Updating frontend API code to use dedicated functions instead of monolithic functions improves code organization and testability
-- Removing unused code (like the monolithic `movies.js` function) reduces technical debt and improves code clarity
-- Standardizing response formats across all API endpoints makes the API easier to use and understand
-- Enhancing error handling in both backend and frontend code improves the user experience
-- Consistent logging throughout the codebase makes debugging easier
-- The refactoring process revealed several areas for improvement, such as inconsistent error handling and response formats
-- The refactored code is more modular, making it easier to add new features or modify existing ones
-- The refactored code follows the Single Responsibility Principle, with each function having a clear and specific purpose
+- The authentication flow provides clear feedback on success and error states
+- Loading indicators are displayed during authentication operations
+- Form validation prevents submission of invalid data
+- Error messages are displayed when authentication operations fail
+- Success messages are displayed after successful operations
+- The Profile page provides a user-friendly interface for managing account settings
+- The host mode toggle provides a simple way to switch between user roles
+- The Navbar provides easy access to authentication-related actions
+- CSS styles for authentication pages create a consistent and professional look
+- Responsive design ensures a good experience on both desktop and mobile devices
+- Loading states should be clearly indicated to users during authentication and data fetching
+- Error messages should be descriptive and actionable
+- Success messages provide positive feedback for user actions
+- Form validation enhances data integrity and user experience
+- Responsive design ensures usability across different devices
+- Visual indicators for required fields help users understand what information is needed
+- Conditional disabling of buttons prevents users from performing actions without meeting requirements
+- Providing logout functionality in multiple locations improves accessibility
+- Adding debug information panels helps developers troubleshoot issues
+- Retry buttons allow users to recover from temporary failures
+- Fallback UI for authentication loading states improves user experience
+- Emergency logout options provide a way for users to recover from stuck authentication states
+- Clear error messages during logout failures help users understand what went wrong
+- Multiple fallback strategies for logout ensure users can always sign out
+- Force page reload can help recover from stuck authentication states
+- Implementing timeout detection for login attempts helps identify and recover from stuck states
+- Adding emergency reset buttons in the login UI improves user experience during authentication issues
+- Providing debug options in the login UI helps developers troubleshoot authentication issues
+- Displaying warning messages for long-running login attempts helps manage user expectations
 
 ## Technical Implementation Details
 
@@ -115,6 +173,123 @@ This file documents new insights and knowledge gained about the Cinema Club Voti
 - Reusing existing single-entity deletion functions (deleteMovie, deleteSession) in bulk operations ensures consistency
 - Bulk operations should always return detailed results including success/failure status for each entity
 - Implementing bulk operations in the library layer allows for better error handling and logging
+- Refactoring database operations into library functions improves code organization
+- Error handling should be comprehensive and provide meaningful feedback
+- Environment variables should be properly configured for different environments
+- Automatic profile creation should handle both missing tables and missing records
+- Authentication state should be explicitly cleared during logout to prevent stale states
+- Supabase's onAuthStateChange listener helps keep authentication state in sync
+- Console logging at key points in the authentication flow helps identify issues
+- Tracking component lifecycle events helps understand when authentication state changes
+- Checking if database tables exist before querying them prevents errors
+- Tracking the number of fetch attempts helps identify infinite loops
+- When extending or modifying third-party libraries, preserve all original functionality
+- Method-by-method extension is safer than object replacement for third-party libraries
+- Store references to original methods before overriding them to maintain functionality
+- Adding new methods with different names instead of overriding existing ones prevents conflicts
+- Using a non-destructive approach to library extension ensures core functionality remains intact
+- Supabase stores authentication state in localStorage with keys prefixed with 'sb-'
+- Clearing localStorage and sessionStorage can force authentication state reset
+- Multiple fallback strategies for logout ensure users can always sign out
+- Force page reload can help recover from stuck authentication states
+- Wrapping authentication methods with proper error handling prevents unhandled rejections
+- Implementing timeout detection for login attempts helps identify and recover from stuck states
+- Tracking authentication errors in the AuthContext allows for better error reporting and recovery
+- Proper cleanup of auth state change listeners prevents memory leaks and unexpected behavior
+
+## Authentication Debugging Techniques
+
+- Adding console logs at key points in the authentication flow helps track state changes
+- Overriding authentication methods with custom implementations provides visibility into the process
+- Creating global debugging functions accessible from the browser console enables manual intervention
+- Adding debug information panels in UI components helps visualize current state
+- Implementing retry functionality allows recovery from temporary failures
+- Emergency logout functions provide a way to break out of stuck states
+- Checking if database tables exist before querying them helps identify schema issues
+- Tracking component lifecycle events helps understand when authentication state changes
+- Adding fallback UI for authentication loading states improves user experience
+- Providing direct navigation options from loading states helps users recover
+- Detailed error logging in catch blocks helps identify the root cause of issues
+- Checking authentication state after logout confirms that the session was properly cleared
+- When adding debugging to third-party libraries, preserve all original functionality
+- Extend methods individually rather than replacing entire objects
+- Store references to original methods before overriding them
+- Add new methods with different names instead of overriding existing ones
+- Implement global emergency functions accessible from the browser console
+- Provide multiple ways to recover from authentication issues
+- Inspect localStorage to identify authentication-related items
+- Clear specific localStorage items to reset authentication state
+- Use force page reload as a last resort to clear memory state
+- Implement aggressive logout strategies that clear all storage
+- Add multiple layers of fallback for critical operations like logout
+- Implementing timeout detection for login attempts helps identify and recover from stuck states
+- Adding emergency reset buttons in the login UI improves user experience during authentication issues
+- Providing debug options in the login UI helps developers troubleshoot authentication issues
+- Wrapping authentication methods with proper error handling prevents unhandled rejections
+- Tracking authentication errors in the AuthContext allows for better error reporting and recovery
+- Using setTimeout to detect potentially stuck operations provides a way to offer recovery options
+
+## Authentication Storage Management
+
+- Supabase stores authentication state in localStorage with keys prefixed with 'sb-'
+- Session information may also be stored in sessionStorage
+- Cookies may be used for certain authentication aspects
+- When regular logout fails, clearing these storage mechanisms can force authentication state reset
+- Identifying authentication-related localStorage items by prefix allows targeted clearing
+- Clearing all storage (localStorage, sessionStorage, cookies) provides the most aggressive logout approach
+- Force page reload ensures all memory state is cleared after storage is reset
+- Using window.location.href for navigation during logout bypasses React Router's state management
+- Multiple fallback strategies for logout ensure users can always sign out
+- Implementing storage clearing in multiple components provides redundancy
+- Global emergency functions provide a last resort for authentication reset
+- Implementing timeout detection for login attempts helps identify when authentication is stuck
+- Adding emergency reset buttons that clear storage helps users recover from stuck states
+- Providing debug options in the login UI helps developers troubleshoot authentication issues
+
+## JavaScript/React Best Practices
+
+- When extending objects with new functionality, preserve all original methods
+- Use method-by-method extension rather than replacing entire objects
+- Store references to original methods before overriding them
+- Use proper error handling in asynchronous operations
+- Implement comprehensive logging for debugging purposes
+- Add fallback UI for error states to improve user experience
+- Use React hooks effectively for state management and side effects
+- Implement proper cleanup in useEffect hooks to prevent memory leaks
+- Use conditional rendering to handle loading and error states
+- Provide meaningful error messages to users
+- Add retry functionality for critical operations
+- Use React Context API for global state management
+- Implement proper authentication state management
+- Use React Router for navigation and route protection
+- Add debugging tools that can be toggled on/off
+- Follow the principle of least surprise when extending third-party libraries
+- Avoid modifying third-party library objects directly when possible
+- Use composition over inheritance for extending functionality
+- Implement proper error boundaries to prevent application crashes
+- Use try/catch blocks for error handling in async operations
+- Add comprehensive logging for debugging purposes
+- Implement proper cleanup in useEffect hooks to prevent memory leaks
+- Use conditional rendering to handle loading and error states
+- Provide meaningful error messages to users
+- Add retry functionality for critical operations
+- Use React Context API for global state management
+- Implement proper authentication state management
+- Use React Router for navigation and route protection
+- Add new methods with different names instead of overriding existing ones
+- Implement global emergency functions accessible from the browser console
+- Provide multiple ways to recover from stuck states
+- Implement multiple layers of fallback for critical operations
+- Use window.location.href for navigation during critical operations like logout
+- Clear localStorage and sessionStorage to reset application state when needed
+- Force page reload as a last resort to clear memory state
+- Wrap authentication methods with proper error handling to prevent unhandled rejections
+- Implement timeout detection for long-running operations to identify stuck processes
+- Add emergency reset options in the UI to help users recover from stuck states
+- Track errors at the context level to provide better error reporting and recovery
+- Properly clean up event listeners and subscriptions to prevent memory leaks
+- Use setTimeout to detect potentially stuck operations and provide recovery options
+- Provide debug options in the UI to help developers troubleshoot issues
 
 ## Architecture Insights
 
@@ -134,297 +309,187 @@ This file documents new insights and knowledge gained about the Cinema Club Voti
 - The AddMovie component is designed to handle both adding new movies and editing existing ones
 - The application follows a RESTful API pattern with separate serverless functions for different operations (get, create, update, delete)
 - The codebase contains a mix of older and newer FaunaDB client implementations, requiring careful handling of database operations
+- Modal dialog patterns simplify user interactions for common tasks
+- Component structure should follow separation of concerns principles
+- Navigation can be simplified using React Router hooks
+- User profiles should contain only essential information needed for the application
+- Authentication state management should be centralized in a context provider
+- Debugging tools should be conditionally rendered based on environment
+- Error boundaries can prevent entire application crashes due to authentication issues
+- When extending third-party libraries, follow a non-destructive approach
+- Implement multiple layers of fallback for critical operations
+- Provide global emergency functions for last-resort recovery
+- Use aggressive cleanup strategies for authentication state management
+- Implement timeout detection for critical operations to identify stuck processes
+- Add emergency reset options in the UI to help users recover from stuck states
+- Track errors at the context level to provide better error reporting and recovery
 
-## Technical Implementation Details
+## Netlify Deployment
 
-- Sessions are sorted by date (newest first) for better user experience
-- Sessions in FaunaDB can now have a sessionName field for better identification
-- Form validation is implemented for required fields with visual feedback
-- The application uses React Router for navigation between different views
-- Bootstrap is used for basic styling with custom CSS for specific components
-- Netlify Functions are used to create a serverless backend API
-- The voting functionality is implemented using a ranking system with the RankInput component
-- Bulk database operations are implemented through dedicated Netlify serverless functions
-- The same SessionsList component is used for both host and voter modes, with conditional rendering based on isHostMode prop
-- OMDB API integration provides rich movie data that is stored in FaunaDB and displayed in the UI
-- The MovieList component processes movie data to ensure consistent structure before passing to MovieCard
-- Bootstrap Icons are used for action buttons to create a cleaner, more modern UI
-- The application uses a consistent pattern for CRUD operations with separate serverless functions
-- Detailed error handling is implemented at both the API and UI levels for better user experience
-- Dedicated serverless functions for specific operations (like delete-movie) provide better reliability than generic endpoints
+- The project is configured for Netlify deployment with a netlify.toml file in the root directory
+- The build command is set to "npm run build" and the publish directory is "build"
+- Netlify functions are stored in the "netlify/functions" directory
+- The project uses redirects to handle client-side routing with React Router
+- The site is deployed at https://cinemaclub-ai.netlify.app
+- Deployment can be done using the Netlify CLI with the command "netlify deploy --prod"
+- It's important to run "npm run build" before deploying to ensure the latest changes are included
+- After updating environment variables in the Netlify dashboard, a redeployment is required for the changes to take effect
+- Environment variables can be set using the Netlify CLI with `netlify env:set KEY VALUE` or through the Netlify dashboard
+- To check existing environment variables, use `netlify env:list` (values are hidden by default)
+- Environment variables set in the Netlify dashboard are not automatically applied to functions until redeployment
+- Environment variables must be configured in Netlify for production deployment
+- Build settings should be properly configured for React applications
+
+## Debugging Strategies
+
+- Console logging at key points helps identify issues in the authentication flow
+- Checking network requests can reveal API communication problems
+- Understanding error codes from Supabase helps diagnose issues
+- Adding emergency logout options can help recover from authentication state issues
+- Tracking component lifecycle events helps understand when authentication state changes
+- Adding retry functionality for critical operations improves resilience
+- Implementing fallback UI for error states improves user experience
+- Creating global debugging functions accessible from the browser console enables manual intervention
+- Checking database table existence before querying helps identify schema issues
+- Detailed error logging in catch blocks helps identify the root cause of issues
+- Examining error stack traces helps pinpoint the exact location of issues
+- Preserving original functionality when adding debugging code prevents new issues
+- Implementing multiple recovery options ensures users can always reset their session
+- Adding emergency logout buttons in UI components provides accessible recovery options
+- Inspecting localStorage and sessionStorage helps identify authentication state issues
+- Clearing specific storage items can reset authentication state
+- Force page reload can help clear memory state when other methods fail
+- Implementing multiple layers of fallback ensures reliability
+- Adding global emergency functions provides a last resort for recovery
+- Implementing timeout detection for login attempts helps identify when authentication is stuck
+- Adding emergency reset buttons that clear storage helps users recover from stuck states
+- Providing debug options in the login UI helps developers troubleshoot authentication issues
+- Wrapping authentication methods with proper error handling prevents unhandled rejections
+- Tracking authentication errors in the AuthContext allows for better error reporting and recovery
+- Using setTimeout to detect potentially stuck operations provides a way to offer recovery options
+
+## FaunaDB Integration
+
+- The project uses FaunaDB as its database solution
+- FaunaDB client is initialized in Netlify functions using environment variables for the secret key
+- The database schema includes collections for Movies, Sessions, and Votes
+- FaunaDB Query Language (FQL) is used for database operations
+- Netlify functions serve as the API layer between the frontend and FaunaDB
+- The project uses the newer `fauna` package instead of the older `faunadb` package
+- Error handling is implemented consistently across database operations with detailed error messages
+- Timestamps are automatically added to records for created and updated operations
+- FaunaDB requires the use of the null-check operator (`!`) when deleting documents to prevent errors when the document doesn't exist
+- Collection names in FaunaDB queries must be consistent and match the actual collection names in the database (e.g., `movies`, `sessions`, `votes` instead of `Movie`, `Session`, `Vote`)
+- FaunaDB's document IDs are strings, not numbers, and must be handled accordingly when performing operations
+- Centralizing FaunaDB operations in a dedicated library significantly simplifies Netlify functions and improves code maintainability
+- Using a centralized FaunaDB library reduces code duplication and ensures consistent error handling across all database operations
+- Refactoring Netlify functions to use a centralized library makes the codebase more maintainable and easier to update
+- The FaunaDB library pattern with separate modules for different entities (movies, sessions, votes) provides a clean separation of concerns
+- FaunaDB uses a document-based model which differs from Supabase's relational model
+- Migration requires mapping between these different data models
+
+## API Architecture
+
+- The project uses Netlify functions as serverless API endpoints
+- Each API endpoint is implemented as a separate function in the `netlify/functions` directory
+- The frontend communicates with these endpoints using the Fetch API
+- API endpoints follow RESTful principles with appropriate HTTP methods (GET, POST, PUT, DELETE)
+- Error handling is implemented consistently across all API endpoints
+- Response formats are standardized across all API endpoints
+- The frontend API code is centralized in dedicated modules (e.g., `src/api/movies.js`, `src/api/sessions.js`)
+- Replacing monolithic API endpoints with dedicated functions for specific operations improves maintainability and testability
+- Dedicated API functions are easier to understand, test, and maintain than monolithic functions that handle multiple operations
+- Frontend API modules abstract away the details of API communication, making it easier to change the underlying implementation
+- Enhanced error handling in frontend API modules improves the user experience by providing more detailed error messages
+- Consistent response parsing in frontend API modules ensures that the frontend always receives data in the expected format
+- Consistent error handling patterns improve maintainability
+- Structured API responses make frontend integration easier
+
+## Bulk Operations
+
+- Bulk operations (like deleting all movies or sessions) are implemented using a two-phase approach:
+  1. First attempt a bulk delete operation using FaunaDB's `forEach` method
+  2. If that fails, fall back to deleting items one by one
+- This approach ensures that bulk operations are as efficient as possible while still being reliable
+- Bulk operations return detailed results, including success/failure status for each item
+- Centralizing bulk operation logic in the FaunaDB library simplifies the Netlify functions that expose these operations
+- Bulk operations are exposed through dedicated API endpoints (`delete-all-movies`, `delete-all-sessions`)
+- The frontend API provides dedicated functions for bulk operations, making them easy to use from the frontend
+- Batch operations can improve performance for multiple related changes
+
+## Refactoring Insights
+
+- Refactoring monolithic functions into dedicated functions for each operation significantly improves code maintainability
+- Centralizing database operations in a dedicated library reduces code duplication and ensures consistent error handling
+- Updating frontend API code to use dedicated functions instead of monolithic functions improves code organization and testability
+- Removing unused code (like the monolithic `movies.js` function) reduces technical debt and improves code clarity
+- Standardizing response formats across all API endpoints makes the API easier to use and understand
+- Enhancing error handling in both backend and frontend code improves the user experience
+- Consistent logging throughout the codebase makes debugging easier
+- The refactoring process revealed several areas for improvement, such as inconsistent error handling and response formats
+- The refactored code is more modular, making it easier to add new features or modify existing ones
+- The refactored code follows the Single Responsibility Principle, with each function having a clear and specific purpose
+- Breaking down large components improves maintainability and readability
+- Extracting reusable logic into custom hooks enhances code reuse
+- Simplifying user interfaces to focus on essential information improves user experience
 
 ## Recent Learnings
 
-- Sorting data by recency (newest first) improves user experience by showing the most relevant content first
-- When adding new fields to database entities, ensure all API endpoints that return those entities include the new fields
-- Adding a modal dialog for session creation improves the user experience by collecting all required information upfront
-- Form validation with visual feedback helps users understand what information is required
-- Displaying meaningful names instead of IDs significantly improves the readability and usability of the application
-- FaunaDB date format may not always be compatible with JavaScript's Date constructor and requires conversion
-- Always validate date values before attempting to format them to prevent runtime errors
-- Some session fields (status, startDate) might be missing in older database records
-- Try-catch blocks should be used when formatting dates to prevent rendering errors
-- FaunaDB query response structure may vary (data can be directly an array or nested within data.data)
-- It's safer to parse API responses as text first, then attempt JSON parsing in a try-catch block
-- The application follows a pattern of conditionally rendering UI elements based on the current app mode
-- Components can be easily extended to support multiple modes by passing appropriate props and using conditional rendering
-- The same endpoint for fetching sessions can be reused in both Host and Vote modes
-- Raw logging of response objects is essential for debugging FaunaDB integration issues
-- Defensive coding is necessary when working with external APIs - never assume field existence
-- Two-stage error handling (both in API function and UI components) creates a more resilient application
-- User feedback with retry capability improves the user experience when API errors occur
-- FaunaDB timestamps are returned as complex objects with properties like 'value', 'timestamp', or 'time'
-- When working with dates from external APIs, it's important to inspect their structure before processing
-- JSON.stringify() can be used as a last resort to at least get some representation of complex objects
-- When refactoring components, it's important to maintain mode-specific UI elements like hiding "Add Movie" in Vote mode
-- Components should be conditionally rendered based on the current application mode to enforce permission boundaries
-- Using established component patterns (like MovieList) helps maintain UI consistency across the application
-- Bulk delete operations in FaunaDB require querying for all documents first, then deleting each one individually
-- Giving admin users debug tools improves the development and testing workflow but should be restricted to admin roles
-- When deleting documents in FaunaDB, it's more reliable to first assign the document to a variable using `let doc = collection.byId(id)` and then call `doc.delete()`
-- IDs in FaunaDB should be explicitly converted to strings when used in queries to avoid type mismatches
-- Extensive logging is crucial for debugging FaunaDB operations, especially capturing the structure of returned documents
-- When integrating external APIs like OMDB, it's important to handle optional fields with fallback values to prevent rendering errors
-- Processing data at the list component level ensures consistent data structure before passing to individual card components
-- Toggle buttons for UI modes should provide clear visual feedback about the current state
-- Form layouts should adapt responsively between mobile and desktop views
-- Null checks are essential when working with API responses that may have missing fields
-- Empty states with helpful instructions improve the user experience for new users
-- Using icons instead of text for action buttons creates a cleaner, more modern UI
-- The useNavigate hook from React Router is essential for programmatic navigation in response to user actions
-- Implementing edit functionality requires careful state management to handle both new and existing data
-- Conditional rendering based on edit mode helps reuse the same form component for both adding and editing
-- Loading states with spinners improve user experience during data fetching operations
-- Error states with retry options help users recover from API failures
-- When implementing a feature, ensure all required serverless functions exist and are properly implemented
-- Detailed error logging in both the browser console and serverless function logs is essential for debugging
-- Providing a retry mechanism for failed API calls improves user experience and helps recover from transient errors
-- Always include a way for users to navigate back when encountering errors to prevent them from getting stuck
-- When updating documents in FaunaDB, it's important to first verify the document exists before attempting to update it
-- Multiple ID format handling (string vs numeric) is necessary for robust FaunaDB operations
-- Implementing fallback strategies for database operations increases the reliability of the application
-- Detailed logging before, during, and after database operations helps identify the exact point of failure
-- When updating a document in FaunaDB, using a multi-step approach with verification improves reliability
-- FaunaDB document updates require a specific structure with a nested 'data' property for the fields to update
-- When updating FaunaDB documents, it's important to use the correct syntax: `doc.update({ data: { field: value } })`
-- FaunaDB has multiple valid syntaxes for updating documents, and implementing fallbacks for each increases reliability
-- The FaunaDB client library may handle document references differently between versions, requiring multiple approaches
-- Using native JavaScript Date objects and converting to ISO strings is more reliable than using FQL Time functions
-- When updating documents, only include the fields that need to be updated to minimize the risk of data loss
-- FaunaDB schema definitions may not reflect the actual structure of documents in the database due to schema evolution
-- When a codebase contains a mix of older and newer FaunaDB client implementations, it's important to create dedicated functions for critical operations
-- Replacing generic endpoints (like movies.js) with dedicated functions for specific operations improves reliability and maintainability
-- When deleting documents in FaunaDB, it's important to use the same client library and syntax as other operations for consistency
-- Updating component code to use new endpoints is simpler than trying to fix complex generic endpoints
-- When implementing critical database operations like deletion, it's essential to try multiple approaches with different syntax variations
-- Examining working code (like delete-all-movies.js) can provide valuable insights into successful patterns for database operations
-- For maximum reliability, implement multiple deletion approaches to handle all possible FaunaDB document formats and ID types
-- Detailed logging of each deletion attempt helps identify which approach works for specific document structures
-- When a function fails with a 500 error, examining the Netlify function logs is crucial for understanding the root cause
-- When client libraries cause inconsistent behavior, using direct REST API calls can provide a more reliable solution
-- Missing or inconsistent client library files can cause hard-to-debug issues in serverless functions
-- Direct REST API calls to FaunaDB can bypass client library inconsistencies and version conflicts
-- Enhanced error reporting in UI components helps users understand what went wrong and provides developers with better debugging information
-- Using built-in Node.js modules like 'https' instead of external dependencies reduces deployment issues in serverless functions
-- Serverless functions should minimize external dependencies to reduce deployment size and potential compatibility issues
-- When working with serverless functions, it's important to check if required modules are available in the runtime environment
-- When working with FaunaDB, it's important to understand the different document structures that can exist in the database
-- FaunaDB FQL queries can be used to search for documents in multiple ways, providing more flexibility than REST API calls
-- The FaunaDB query language (FQL) allows for complex operations like filtering, mapping, and conditional logic
-- When deleting documents in FaunaDB, it's important to verify the document exists before attempting to delete it
-- FaunaDB documents can be referenced in multiple ways: by ID, by reference, or by query
-- When working with FaunaDB, it's important to identify which version of FQL syntax is supported by your database
-- The FQL syntax in the documentation may not match the syntax supported by your specific FaunaDB instance
-- Error messages like "Cannot use `[]` operator with type `Set<movies>`" indicate that you're using newer FQL syntax with an older FaunaDB version
-- Classic FQL syntax uses functions like Get(), Match(), Delete() instead of the newer dot notation syntax
-- When troubleshooting FaunaDB operations, pay close attention to the exact error messages as they provide clues about the correct syntax
-- When troubleshooting a non-working function, examine a similar working function and replicate its approach exactly
-- Using the exact same client library and version is crucial for consistent behavior across related functions
-- When multiple approaches fail, the most reliable solution is to copy the approach from a known working function
-- The client library import statement is critical - using `const { Client, fql } = require('fauna')` vs other import methods can make a difference
-- For maximum reliability, use the same client initialization, query syntax, and error handling as a working function
-- When using FQL queries, avoid direct string interpolation inside the query
-- FQL queries with variables are more reliable than direct string interpolation
-- String values in FQL queries should be defined as variables outside string contexts to avoid escaping issues
-- When troubleshooting FQL syntax errors, examine the exact error message which often points to the specific syntax issue
-- For critical operations like deletion, finding the document first and then using its exact ID for deletion is more reliable than direct ID-based deletion
-- Comprehensive error handling with multiple fallback strategies is essential for robust serverless functions
-- Enhanced error reporting in UI components provides better user feedback and debugging information
-- When all else fails, simplify the approach and focus on what works rather than trying to fix complex queries
-- For FaunaDB operations, it's often more reliable to first fetch all documents and then find the target document in JavaScript before performing operations
-- Using a JavaScript-first approach (finding items in memory) before attempting database operations can be more reliable than complex FQL queries
-- When implementing multiple deletion strategies, use a cascading approach where each strategy is only attempted if the previous one fails
-- Implementing a "find first, then delete" pattern is more reliable than trying to delete directly by ID
-- For complex operations, it's better to break them down into multiple simple steps rather than trying to do everything in a single query
-- When working with FaunaDB, extensive logging of input parameters, intermediate results, and final outcomes is essential for debugging
-- Creating dedicated test scripts for debugging database operations is an effective way to isolate and fix issues
-- Test scripts that verify both the operation and its result provide a reliable way to debug database functionality
-- When debugging update operations, it's important to verify the update by fetching the document again after the update
-- Using Promise.race with a timeout is an effective way to prevent test scripts from hanging indefinitely
-- Detailed logging of document structure before and after operations helps identify issues with field updates
-- Test scripts should include comprehensive error handling to capture and display all possible error scenarios
-- When testing database operations, it's helpful to display all available documents to ensure you're using a valid ID
-- Test scripts should provide suggestions for next steps when operations fail, such as using a different document ID
-- Verifying database operations with explicit success/failure messages makes it clear whether the operation worked as expected
-- The null-check operator (!) is required in FaunaDB when performing operations on documents that might not exist
-- FaunaDB's error messages often provide helpful hints for fixing issues, such as "Use the ! or ?. operator to handle the null case"
-- When updating documents in FaunaDB, always use the null-check operator (!) to prevent "Type `Null` does not have field `update`" errors
-- The same null-check pattern applies to all document operations in FaunaDB: create, read, update, and delete
-- FaunaDB's null-check operator (!) is similar to TypeScript's non-null assertion operator but works at runtime
-- The null-check operator (!) tells FaunaDB to throw an error if the document doesn't exist, rather than returning null
-- Using the null-check operator (!) is more concise than writing explicit null checks in FQL
-- The alternative to the null-check operator (!) is the optional chaining operator (?.), which returns null instead of throwing an error
-- For update operations, the null-check operator (!) is usually preferred to fail fast if the document doesn't exist
-- The error message "Type `Null` does not have field `update`" is a clear indicator that you need to add the null-check operator (!)
-- The same pattern applies to delete operations: `doc!.delete()` instead of `doc.delete()`
-
-## FaunaDB Date Format Specifics
-
-- FaunaDB may return timestamps as JSON objects with an `isoString` property
-- FaunaDB Time objects sometimes use an `@ts` property to store the actual timestamp value
-- When stringifying date objects, they may become nested JSON strings that need to be parsed again
-- Multi-level parsing might be needed to extract date values from FaunaDB responses
-- Always check both the type of date values and their internal structure
-- It's safer to parse JSON strings within your date handling functions, as FaunaDB might use different formats across versions
-
-## FaunaDB Query and Modification Best Practices
-
-- Always validate the structure of data returned from FaunaDB queries before attempting to access nested properties
-- For important operations like deletion, log the full document structure to understand what you're working with
-- When deleting documents, use a two-step approach: first retrieve the document by ID, then delete it
-- Convert IDs to strings when passing them to FaunaDB queries to ensure consistent type handling
-- Include extensive error handling for each document operation in bulk processes, rather than relying on a single try/catch
-- For debugging FaunaDB operations, log both input parameters and output results to track the flow of data
-- Multiple deletion strategies may be needed for FaunaDB documents due to syntax differences between versions or document structures
-- FaunaDB bulk operations can be performed using the forEach method on a collection's all() result
-- When doing critical operations, implement multiple fallback approaches to handle different FaunaDB syntax variations
-- Try multiple ID formats when deleting documents (numeric ID, string ID, quoted ID) as FaunaDB may interpret them differently
-- For critical operations, verify the results by querying the database again after the operation
-- Numeric vs string IDs can cause issues in FaunaDB - always try both formats if one fails 
-- When updating documents in FaunaDB, use the pattern `let doc = collection.byId(id)` followed by `doc.update(data)`
-- The FQL `Time.now()` function can be used to automatically timestamp document updates
-- When fetching a single document by ID, use the pattern `let doc = collection.byId(id)` followed by `doc` to return the document
-- Always check if a document exists before trying to access its properties to avoid runtime errors
-- For update operations, implement a multi-step approach: first check if the document exists, then attempt the update
-- When an update fails, try alternative ID formats (string vs numeric) as FaunaDB may handle them differently
-- Wrap each database operation in its own try-catch block to implement fallback strategies
-- Log the document structure before and after update operations to verify changes were applied correctly
-- Use the spread operator (...) when returning updated document data to include all fields in the response
-- FaunaDB document updates require a specific structure with fields nested under a 'data' property
-- There are multiple valid syntaxes for updating documents in FaunaDB:
-  - `doc.update({ data: { field: value } })`
-  - `collection.update(id, { data: { field: value } })`
-- The FaunaDB client may interpret document references differently between versions, requiring multiple update approaches
-- When updating documents, it's safer to use JavaScript Date objects converted to ISO strings than FQL Time functions
-- For maximum compatibility, implement at least three fallback strategies for critical database operations
-- The actual document structure in FaunaDB may differ from the schema definition due to schema evolution over time
-- FaunaDB's error messages may not always clearly indicate the root cause of failures, requiring extensive logging
-- There are multiple valid syntaxes for deleting documents in FaunaDB:
-  - `doc.delete()`
-  - `collection.delete(id)`
-- When a codebase uses multiple versions of the FaunaDB client, it's better to create dedicated functions for each operation
-- The older FaunaDB client uses `q.Delete(q.Ref(q.Collection('movies'), id))` syntax
-- The newer FaunaDB client uses `movies.byId(id).delete()` syntax
-- Mixing different client versions in the same codebase can lead to inconsistent behavior and errors
-- For reliable document deletion in FaunaDB, implement multiple approaches:
-  1. Using forEach to iterate through all documents and find the target by ID
-  2. Direct deletion with byId using numeric ID
-  3. Direct deletion with byId using string ID
-- When implementing multiple fallback strategies, use a boolean flag to track success and only try subsequent approaches if previous ones fail
-- Always return detailed error information to the client when all deletion approaches fail to aid in debugging
-- The "delete all" functionality can be a valuable reference for implementing single-document deletion with the same patterns
-- When debugging FaunaDB operations, log the type of ID being used (typeof id) as type mismatches are a common source of errors
-- FQL queries can be used to find documents by any field, not just by ID
-- The `movies.where(.id == "value")` syntax is more reliable than direct document references
-- FQL's `filter()` function can be used to search for documents with specific field values
-- The `append()` function in FQL can be used to add items to an array
-- FQL's `forEach()` function can be used to iterate over collections and perform operations on each document
-- When a document is not found, FQL operations may return null, which requires null checking before operations
-- The error "Type 'Null' does not have field 'delete'" indicates an attempt to call a method on a null value
-- Classic FQL syntax uses functions like Get(), Match(), Delete() instead of the newer dot notation syntax
-- The error "Cannot use `[]` operator with type `Set<movies>`" indicates that array indexing is not supported in your FaunaDB version
-- The error "Type `Set<movies>` does not have field `filter`" indicates that the filter() method is not supported in your FaunaDB version
-- The error "Type `Array<Never>` does not have field `count`" indicates that the count() method is not supported in your FaunaDB version
-- Classic FQL uses Lambda() and Var() for working with variables instead of arrow functions
-- Classic FQL uses Select() to access object properties instead of dot notation
-- When using classic FQL, document references are created with Ref(Collection("name"), "id")
-- The Paginate() function is used to handle sets of references in classic FQL
-- The Map() function is used to apply operations to each item in a set in classic FQL
-- The Filter() function is used to filter sets based on a condition in classic FQL
-- The Equals() function is used for equality comparisons in classic FQL
-- The Documents() function is used to get all documents in a collection in classic FQL
-- When a function works in one context (bulk operations) but not another (single operations), use the exact same approach for both
-- The newer FaunaDB client uses `const { Client, fql } = require('fauna')` import syntax
-- The newer FaunaDB client supports dot notation for accessing collection methods: movies.all(), movies.byId()
-- When multiple deletion approaches fail, try using forEach to iterate through all documents and find the target by ID
-- Using a combination of string and numeric ID comparisons increases reliability
-- Tracking success with a boolean flag and returning structured results helps identify which approach worked
-- For string values in FQL, define variables at the beginning of the query
-- For numeric values in FQL, define variables at the beginning of the query
-- Always use proper null checking in FQL queries: `if (doc != null) { ... }`
-- When a query fails with syntax errors, try restructuring it to use variables instead of direct interpolation
-- FQL queries should be structured to avoid direct string interpolation within expressions
-
-## OMDB API Integration
-
-- The OMDB API provides rich movie data including title, year, director, genre, plot, and ratings
-- When storing OMDB data in FaunaDB, include all relevant fields to enhance the user experience
-- Always handle missing OMDB fields with fallback values to prevent rendering errors
-- The MovieCard component can display OMDB data using Bootstrap badges for a clean UI
-- Processing movie data at the list level ensures consistent data structure before rendering individual cards
-- The OMDB API returns poster URLs that can be used directly in the UI
-- For movies without posters, always provide a placeholder image URL 
-- The OMDB API doesn't have direct parameters for searching by director or actor, only title search is supported
-- The OMDB API's search endpoint (with parameter 's') only returns basic movie information, requiring additional calls to get full details
-- The OMDB API response structure differs between search results and detailed movie information
-- The OMDB API may return 'N/A' for missing fields rather than null or empty strings
-- The OMDB API has rate limits, so it's important to optimize the number of API calls made during searches
-- The OMDB API parameters are limited to: search term (s), type (movie/series/episode), year (y), page number, and response format
-- For advanced search capabilities like filtering by director or actor, a different API like TMDB would be more suitable
-- When implementing search functionality, it's crucial to review API documentation to understand its capabilities and limitations
-- The OMDB API is best used for title-based searches and retrieving detailed information about specific movies by IMDb ID 
-
-## React Component Best Practices
-
-- Functions that need to be called from event handlers should be defined at the component level, not inside useEffect hooks
-- When a function is defined inside a useEffect hook, it's only accessible within that hook's scope
-- Moving data fetching functions outside of useEffect makes them reusable throughout the component
-- For functions that depend on state or props, define them at the component level to ensure they have access to the latest values
-- When refreshing data after operations like delete or update, having reusable fetch functions at the component level simplifies the code
-- The React component scope follows JavaScript closure rules - inner functions have access to outer variables, but not vice versa 
-
-## Netlify Functions Refactoring
-
-- Refactoring all Netlify functions to use the FaunaDB library has significantly reduced code complexity
-- The get-sessions.js function was reduced from over 200 lines to less than 30 lines after refactoring
-- Complex date extraction logic is now handled in the library layer rather than in individual functions
-- Refactored functions follow a consistent structure: validate request, call library function, return response
-- Error handling and logging patterns are consistent across all refactored functions
-- Refactored functions are more resilient to changes in FaunaDB response structures
-- The library approach makes it easier to add new features or modify existing ones
-- Separation of concerns is improved with HTTP handling in functions and data processing in the library
-- Refactored functions are easier to test due to reduced responsibilities
-- Duplicate functions (create-session.js and add-session.js) can be consolidated in future refactoring
-- Standardized implementations for CRUD operations across all entity types
-- Improved error reporting and validation consistency
-- Enhanced timestamp handling and data structure standardization
-- Bulk operations (delete-all-movies.js, delete-all-sessions.js) are now much simpler, delegating complex logic to the library
-- Refactored bulk deletion functions are reduced from nearly 200 lines to less than 40 lines each
-- The library approach allows for reuse of common patterns across different entity types
-- Bulk operations now have consistent error handling and result formatting
-
-## Debugging Netlify Function 500 Errors
-
-- When troubleshooting 500 Internal Server Errors in Netlify Functions, adding detailed error logging is essential
-- Adding `console.log('FAUNA_SECRET_KEY exists:', !!process.env.FAUNA_SECRET_KEY)` helps verify environment variables without exposing secrets
-- Including error stack traces in the response body helps with client-side debugging: `error: error.message, stack: error.stack`
-- Adding timeouts to FaunaDB client initialization prevents hanging connections: `timeout: 10000`
-- Creating a dummy client that throws helpful errors when FaunaDB initialization fails improves debugging
-- Enhancing frontend error handling to parse and display detailed error information from the server response helps diagnose issues
-- Adding CSS styling for error details makes debugging information more readable for developers
-- When deployed to Netlify, environment variables must be set in the Netlify dashboard, not just in local .env files
-- Parsing error responses as text first, then attempting JSON parsing in a try-catch block provides more robust error handling
-- Adding the error cause to thrown errors using `throw new Error(message, { cause: errorObj })` preserves detailed error information
-- Conditionally displaying detailed error information only in Host mode prevents exposing sensitive information to regular users
-- Using `JSON.stringify(error, Object.getOwnPropertyNames(error))` captures non-enumerable properties of Error objects
-- Adding fallback client creation in case of initialization errors prevents cascading failures in the application
+- Supabase provides a more integrated solution for both database and authentication compared to FaunaDB
+- Row-Level Security (RLS) policies in Supabase provide a powerful way to control data access at the database level
+- The AuthContext pattern provides a clean way to manage authentication state throughout a React application
+- Protected routes can be implemented using component composition in React Router
+- User roles can be managed through custom user metadata in Supabase
+- The useAuth hook simplifies access to authentication state and methods throughout the application
+- Form validation with visual feedback improves the user experience in authentication forms
+- Loading states with spinners provide better feedback during asynchronous operations
+- Error handling with clear error messages helps users understand what went wrong
+- Success messages provide confirmation that operations completed successfully
+- The Profile page provides a central place for users to manage their account settings
+- The host mode toggle provides a simple way to switch between user roles
+- CSS styles for authentication pages create a consistent and professional look
+- Responsive design ensures a good experience on both desktop and mobile devices
+- Supabase's authentication API provides methods for common operations like signUp, signIn, and signOut
+- User session state is persisted in local storage by the Supabase client
+- The AuthContext provides a centralized way to access authentication state throughout the app
+- Protected routes can be implemented using the authentication state from AuthContext
+- Host-specific routes can be protected based on the user's host status
+- Conditional rendering based on authentication state improves the user experience
+- The Navbar provides easy access to authentication-related actions
+- CSS styles for authentication pages create a consistent and professional look
+- Responsive design ensures a good experience on both desktop and mobile devices
+- Handling missing database tables requires graceful error recovery
+- Automatic profile creation for new users improves the onboarding experience
+- Proper error handling for database operations is essential for robust applications
+- Supabase RLS policies provide a powerful way to secure data access
+- Requiring username for host mode ensures accountability and identification in collaborative features
+- Conditional UI elements can guide users through required steps before enabling certain features
+- Explicitly clearing authentication state during logout prevents UI inconsistencies
+- Providing multiple logout options improves user experience and helps recover from stuck states
+- Comprehensive logging throughout the authentication flow helps identify issues
+- Emergency logout functions provide a way to recover from stuck authentication states
+- Adding retry functionality for profile fetching improves resilience
+- Checking if database tables exist before querying them prevents errors
+- Tracking component lifecycle events helps understand when authentication state changes
+- Adding fallback UI for authentication loading states improves user experience
+- When extending third-party libraries, preserve all original functionality to prevent unexpected issues
+- Method-by-method extension is safer than replacing entire objects when adding debugging
+- The onAuthStateChange listener is critical for proper authentication state management
+- Examining error stack traces helps pinpoint the exact location of issues
+- Preserving original functionality when adding debugging code prevents new issues
+- Overriding individual methods is safer than replacing entire objects
+- Adding new methods with different names instead of overriding existing ones is the safest approach
+- Implementing global emergency functions provides a last resort for recovery
+- Providing multiple ways to recover from authentication issues improves user experience
+- Supabase stores authentication state in localStorage with keys prefixed with 'sb-'
+- Clearing localStorage and sessionStorage can force authentication state reset
+- Multiple fallback strategies for logout ensure users can always sign out
+- Force page reload can help recover from stuck authentication states
+- Using window.location.href for navigation during logout is more reliable than React Router's navigate
+- Unhandled Promise rejections in authentication methods can cause the login process to get stuck
+- Wrapping authentication methods with proper error handling prevents unhandled rejections
+- Implementing timeout detection for login attempts helps identify and recover from stuck states
+- Providing emergency reset options in the login UI improves user experience during authentication issues
+- Tracking authentication errors in the AuthContext allows for better error reporting and recovery
+- Proper cleanup of auth state change listeners prevents memory leaks and unexpected behavior
+- Using setTimeout to detect potentially stuck operations provides a way to offer recovery options
