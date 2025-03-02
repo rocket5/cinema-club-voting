@@ -36,53 +36,6 @@ const extractDateString = (dateObj) => {
  */
 const getSessions = async () => {
   try {
-    console.log('Getting sessions from Supabase...');
-    
-    // Debug: Check profiles table structure
-    try {
-      console.log('Checking profiles table structure...');
-      const { data: profilesInfo, error: profilesInfoError } = await supabase
-        .from('profiles')
-        .select('*')
-        .limit(5);
-      
-      if (profilesInfoError) {
-        console.error('Error checking profiles table structure:', profilesInfoError);
-      } else if (profilesInfo && profilesInfo.length > 0) {
-        console.log('Profiles table first row:', JSON.stringify(profilesInfo[0], null, 2));
-        console.log('Profiles table columns:', Object.keys(profilesInfo[0]));
-        
-        // Check if there are any non-null values for each column
-        const columnStats = {};
-        Object.keys(profilesInfo[0]).forEach(column => {
-          columnStats[column] = {
-            nullCount: 0,
-            nonNullCount: 0,
-            examples: []
-          };
-        });
-        
-        profilesInfo.forEach(profile => {
-          Object.keys(profile).forEach(column => {
-            if (profile[column] === null) {
-              columnStats[column].nullCount++;
-            } else {
-              columnStats[column].nonNullCount++;
-              if (columnStats[column].examples.length < 2) {
-                columnStats[column].examples.push(profile[column]);
-              }
-            }
-          });
-        });
-        
-        console.log('Column statistics:', JSON.stringify(columnStats, null, 2));
-      } else {
-        console.log('No profiles found');
-      }
-    } catch (profilesInfoError) {
-      console.error('Exception checking profiles table structure:', profilesInfoError);
-    }
-    
     // Get all sessions from the database
     const { data: sessionsData, error } = await supabase
       .from('sessions')
@@ -95,11 +48,8 @@ const getSessions = async () => {
     }
     
     if (!sessionsData || sessionsData.length === 0) {
-      console.log('No sessions found');
       return [];
     }
-    
-    console.log(`Found ${sessionsData.length} sessions`);
     
     // Convert snake_case to camelCase
     const sessions = sessionsData.map(session => ({
@@ -116,10 +66,7 @@ const getSessions = async () => {
     // Process each session to include host information
     for (const session of sessions) {
       try {
-        // Instead of using fetch to call the Netlify function, query the profiles table directly
         if (session.hostId) {
-          console.log(`Getting host info for session ${session.id} with hostId ${session.hostId}`);
-          
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('id, name, username')
@@ -127,34 +74,28 @@ const getSessions = async () => {
             .single();
           
           if (profileError) {
-            console.error(`Error fetching profile for session ${session.id}:`, profileError);
-            // Create a user-friendly ID from the UUID
             const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
             session.hostUsername = `User ${shortId}`;
             session.displayName = session.hostUsername;
           } else if (profile) {
-            console.log(`Profile data for session ${session.id}:`, profile);
-            
-            // Use username or name, with fallback to user ID
-            if (profile.username) {
-              session.hostUsername = profile.username;
-            } else if (profile.name) {
+            // Use name or username, with fallback to user ID
+            if (profile.name) {
               session.hostUsername = profile.name;
+              session.displayName = profile.name;
+            } else if (profile.username) {
+              session.hostUsername = profile.username;
+              session.displayName = profile.username;
             } else {
               const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
               session.hostUsername = `User ${shortId}`;
+              session.displayName = session.hostUsername;
             }
-            session.displayName = session.hostUsername;
-            
-            console.log(`Set hostUsername for session ${session.id} to ${session.hostUsername}`);
           } else {
-            console.log(`No profile found for hostId ${session.hostId}`);
             const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
             session.hostUsername = `User ${shortId}`;
             session.displayName = session.hostUsername;
           }
         } else {
-          console.log(`Session ${session.id} has no hostId`);
           session.hostUsername = 'Unknown User';
           session.displayName = 'Unknown User';
         }
@@ -200,13 +141,9 @@ const getSessionById = async (id) => {
       winningMovie: data.winning_movie || null
     };
     
-    console.log('Session before fetching host data:', session);
-    
     // Try to get the host's username
     try {
       if (session.hostId) {
-        console.log(`Getting host info for session ${session.id} with hostId ${session.hostId}`);
-        
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id, name, username')
@@ -214,34 +151,28 @@ const getSessionById = async (id) => {
           .single();
         
         if (profileError) {
-          console.error(`Error fetching profile for session ${session.id}:`, profileError);
-          // Create a user-friendly ID from the UUID
           const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
           session.hostUsername = `User ${shortId}`;
           session.displayName = session.hostUsername;
         } else if (profile) {
-          console.log(`Profile data for session ${session.id}:`, profile);
-          
-          // Use username or name, with fallback to user ID
-          if (profile.username) {
-            session.hostUsername = profile.username;
-          } else if (profile.name) {
+          // Use name or username, with fallback to user ID
+          if (profile.name) {
             session.hostUsername = profile.name;
+            session.displayName = profile.name;
+          } else if (profile.username) {
+            session.hostUsername = profile.username;
+            session.displayName = profile.username;
           } else {
             const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
             session.hostUsername = `User ${shortId}`;
+            session.displayName = session.hostUsername;
           }
-          session.displayName = session.hostUsername;
-          
-          console.log(`Set hostUsername for session ${session.id} to ${session.hostUsername}`);
         } else {
-          console.log(`No profile found for hostId ${session.hostId}`);
           const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
           session.hostUsername = `User ${shortId}`;
           session.displayName = session.hostUsername;
         }
       } else {
-        console.log(`Session ${session.id} has no hostId`);
         session.hostUsername = 'Unknown User';
         session.displayName = 'Unknown User';
       }
@@ -252,7 +183,6 @@ const getSessionById = async (id) => {
       session.displayName = session.hostUsername;
     }
     
-    console.log('Final session with host data:', session);
     return session;
   } catch (error) {
     console.error('Error getting session by ID:', error);

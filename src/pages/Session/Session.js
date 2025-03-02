@@ -97,8 +97,8 @@ function Session() {
                     <h1>{sessionData?.sessionName || 'Movie Voting Session'}</h1>
                     <p className="text-muted">
                         Session ID: {sessionId}
-                        {sessionData?.hostUsername && (
-                            <span> | Created by: {sessionData.hostUsername}</span>
+                        {sessionData?.displayName && (
+                            <span> | Created by: {sessionData.displayName}</span>
                         )}
                     </p>
                 </div>

@@ -16,39 +16,7 @@ function Profile() {
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [profileFetchAttempts, setProfileFetchAttempts] = useState(0);
-  const [initialLoadTimeout, setInitialLoadTimeout] = useState(false);
-  const [forceRecovery, setForceRecovery] = useState(false);
-  const userCheckTimerRef = useRef(null);
   const profileFetchTimerRef = useRef(null);
-
-  // Set a timeout for initial loading
-  useEffect(() => {
-    console.log('Setting up initial load timeout');
-    const timeoutId = setTimeout(() => {
-      console.log('Initial load timeout triggered');
-      setInitialLoadTimeout(true);
-    }, 5000); // 5 seconds timeout
-    
-    // Set a longer timeout for forced recovery
-    const recoveryTimeoutId = setTimeout(() => {
-      console.log('Force recovery timeout triggered');
-      setForceRecovery(true);
-      // If we still don't have user data after 15 seconds, set default values
-      if (!user) {
-        console.log('No user data after extended timeout, setting defaults');
-        setUserData({
-          name: '',
-          isHost: false
-        });
-        setLoading(false);
-      }
-    }, 15000); // 15 seconds timeout
-    
-    return () => {
-      clearTimeout(timeoutId);
-      clearTimeout(recoveryTimeoutId);
-    };
-  }, []);
 
   // Debug log when component mounts
   useEffect(() => {
@@ -56,18 +24,8 @@ function Profile() {
     console.log('Initial user state:', user);
     console.log('Initial loading state:', loading);
     
-    // Set up a timer to periodically check for user
-    userCheckTimerRef.current = setInterval(() => {
-      console.log('Periodic user check:', user);
-      if (user && loading) {
-        console.log('User available but still loading, retrying fetch');
-        fetchUserProfile();
-      }
-    }, 3000); // Check every 3 seconds
-    
     return () => {
       console.log('Profile component unmounting');
-      clearInterval(userCheckTimerRef.current);
       clearTimeout(profileFetchTimerRef.current);
     };
   }, []);
@@ -412,69 +370,7 @@ function Profile() {
     fetchUserProfile();
   };
 
-  // Force recovery if needed
-  useEffect(() => {
-    if (forceRecovery && loading) {
-      console.log('Force recovery triggered while still loading');
-      setLoading(false);
-      
-      if (user) {
-        console.log('User exists but profile fetch failed, setting default values');
-        setUserData({
-          name: user?.user_metadata?.name || '',
-          isHost: false
-        });
-      }
-    }
-  }, [forceRecovery, loading, user]);
-
-  console.log('Rendering Profile component with state:', { user, loading, userData, forceRecovery });
-
-  // If we're in force recovery mode and have a user, show the profile with default values
-  if (forceRecovery && user) {
-    return (
-      <div className="profile-container">
-        <div className="profile-card">
-          <h2>User Profile (Recovery Mode)</h2>
-          
-          <div className="warning-message" style={{ marginBottom: '20px' }}>
-            Profile data could not be loaded completely. Some features may be limited.
-          </div>
-          
-          <div className="profile-header">
-            <div className="profile-email">{user.email}</div>
-            <div className="profile-status">
-              Status: Regular User
-            </div>
-          </div>
-          
-          <div className="profile-actions">
-            <button 
-              className="profile-button primary"
-              onClick={handleRetryFetch}
-            >
-              Retry Loading Profile
-            </button>
-            <button 
-              className="profile-button danger"
-              onClick={handleEmergencyLogout}
-            >
-              Emergency Logout
-            </button>
-          </div>
-          
-          <div className="profile-footer">
-            <button 
-              className="profile-button secondary"
-              onClick={() => window.location.reload(true)}
-            >
-              Reload Page
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  console.log('Rendering Profile component with state:', { user, loading, userData });
 
   if (!user) {
     console.log('No user available, showing loading spinner');
@@ -482,27 +378,6 @@ function Profile() {
       <div className="loading-container">
         <div className="spinner"></div>
         <p>Waiting for user data...</p>
-        {initialLoadTimeout && (
-          <div>
-            <p style={{ color: '#721c24', marginTop: '20px' }}>
-              Loading is taking longer than expected. You can wait or try to reset.
-            </p>
-            <button 
-              onClick={() => window.location.href = '/login'} 
-              className="profile-button secondary"
-              style={{ marginTop: '10px' }}
-            >
-              Return to Login
-            </button>
-            <button 
-              onClick={handleEmergencyLogout} 
-              className="profile-button danger"
-              style={{ marginTop: '10px', marginLeft: '10px' }}
-            >
-              Emergency Reset
-            </button>
-          </div>
-        )}
       </div>
     );
   }
@@ -533,15 +408,6 @@ function Profile() {
                 style={{ marginTop: '10px' }}
               >
                 Retry
-              </button>
-            )}
-            {initialLoadTimeout && (
-              <button 
-                onClick={handleEmergencyLogout} 
-                className="profile-button danger"
-                style={{ marginTop: '10px', marginLeft: '10px' }}
-              >
-                Emergency Reset
               </button>
             )}
           </div>
@@ -639,7 +505,6 @@ function Profile() {
             <p>Email: {user?.email}</p>
             <p>Loading: {loading.toString()}</p>
             <p>Fetch Attempts: {profileFetchAttempts}</p>
-            <p>Force Recovery: {forceRecovery.toString()}</p>
             <p>User Data: {JSON.stringify(userData)}</p>
             <button 
               onClick={handleRetryFetch}

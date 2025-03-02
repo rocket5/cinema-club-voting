@@ -30,10 +30,7 @@ function Home() {
         setError(null);
         setErrorDetails(null);
         try {
-            console.log('Fetching sessions...');
             const response = await fetch('/.netlify/functions/get-sessions');
-            
-            console.log('Response status:', response.status);
             
             if (!response.ok) {
                 const errorText = await response.text();
@@ -49,40 +46,17 @@ function Home() {
                 throw new Error(`HTTP error! status: ${response.status}`, { cause: errorObj });
             }
             
-            const text = await response.text(); // Get raw text first
-            console.log('Raw response:', text);
+            const data = await response.json();
             
-            let data;
-            try {
-                // Try to parse JSON
-                data = JSON.parse(text);
-            } catch (e) {
-                console.error('Error parsing JSON:', e);
-                throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}...`);
+            if (!data || !data.sessions) {
+                throw new Error('Invalid response format');
             }
             
-            console.log('Parsed sessions data:', data);
-            
-            if (data && Array.isArray(data.sessions)) {
-                // Sort sessions by date (newest first)
-                const sortedSessions = [...data.sessions].sort((a, b) => {
-                    const dateA = new Date(a.startDate || a.createdAt || 0);
-                    const dateB = new Date(b.startDate || b.createdAt || 0);
-                    return dateB - dateA; // Descending order (newest first)
-                });
-                setSessions(sortedSessions);
-            } else {
-                console.warn('Unexpected data format:', data);
-                setSessions([]);
-            }
-        } catch (err) {
-            console.error('Error fetching sessions:', err);
-            setError(`${err.message}. Please try again later.`);
-            
-            // Store detailed error information for debugging
-            if (err.cause) {
-                setErrorDetails(err.cause);
-            }
+            setSessions(data.sessions);
+        } catch (error) {
+            console.error('Error fetching sessions:', error);
+            setError('Failed to load sessions');
+            setErrorDetails(error.message);
         } finally {
             setLoading(false);
         }
