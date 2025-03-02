@@ -376,7 +376,9 @@ function Profile() {
     console.log('No user available, showing loading spinner');
     return (
       <div className="loading-container">
-        <div className="spinner"></div>
+        <div className="spinner-container">
+          <i className="bi bi-arrow-repeat spinning"></i>
+        </div>
         <p>Waiting for user data...</p>
       </div>
     );
@@ -390,16 +392,43 @@ function Profile() {
         {error && <div className="error-message">{error}</div>}
         {message && <div className="success-message">{message}</div>}
         
-        <div className="profile-header">
-          <div className="profile-email">{user.email}</div>
-          <div className="profile-status">
-            Status: {userData.isHost ? 'Host' : 'Regular User'}
+        <div className="profile-info-section">
+          <div className="profile-avatar">
+            <div className="avatar-circle">
+              {userData.name ? userData.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+            </div>
+          </div>
+          
+          <div className="profile-details-container">
+            <div className="profile-info-item">
+              <span className="info-label">Email</span>
+              <span className="info-value">{user.email}</span>
+            </div>
+            
+            <div className="profile-info-item">
+              <span className="info-label">Username</span>
+              <span className="info-value">{userData.name || 'Not set'}</span>
+              {userData.isHost && !userData.name && (
+                <div className="warning-message">Please set a username for host mode</div>
+              )}
+            </div>
+            
+            <div className="profile-info-item">
+              <span className="info-label">Account Type</span>
+              <span className="info-value">
+                <span className={`status-badge ${userData.isHost ? 'host' : 'regular'}`}>
+                  {userData.isHost ? 'Host' : 'Regular User'}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
         
         {loading && (
           <div className="loading-indicator">
-            <div className="spinner"></div>
+            <div className="spinner-container">
+              <i className="bi bi-arrow-repeat spinning"></i>
+            </div>
             <p>Loading profile data...</p>
             {profileFetchAttempts > 1 && (
               <button 
@@ -407,14 +436,14 @@ function Profile() {
                 className="profile-button secondary"
                 style={{ marginTop: '10px' }}
               >
-                Retry
+                <i className="bi bi-arrow-clockwise"></i> Retry
               </button>
             )}
           </div>
         )}
         
         {!loading && isEditMode ? (
-          <form onSubmit={handleUpdateProfile}>
+          <form onSubmit={handleUpdateProfile} className="edit-profile-form">
             <div className="form-group">
               <label htmlFor="name">Username {userData.isHost && <span className="required">*</span>}</label>
               <input
@@ -437,7 +466,7 @@ function Profile() {
                 className="profile-button primary"
                 disabled={loading}
               >
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? 'Saving...' : <><i className="bi bi-check-lg"></i> Save Changes</>}
               </button>
               <button 
                 type="button" 
@@ -445,88 +474,72 @@ function Profile() {
                 onClick={() => setIsEditMode(false)}
                 disabled={loading}
               >
-                Cancel
+                <i className="bi bi-x-lg"></i> Cancel
               </button>
             </div>
           </form>
         ) : !loading && (
-          <div className="profile-details">
-            <div className="profile-field">
-              <strong>Username:</strong> {userData.name || 'Not set'}
-              {userData.isHost && !userData.name && (
-                <div className="warning-message">Please set a username for host mode</div>
-              )}
-            </div>
-            
-            <div className="profile-actions">
-              <button 
-                className="profile-button primary"
-                onClick={() => setIsEditMode(true)}
-                disabled={loading}
-              >
-                Edit Profile
-              </button>
-              <button 
-                className="profile-button toggle-host"
-                onClick={toggleHostMode}
-                disabled={loading || (userData.isHost === false && !userData.name.trim())}
-              >
-                {loading ? 'Updating...' : userData.isHost ? 'Switch to Regular User' : 'Switch to Host Mode'}
-              </button>
-              {!userData.isHost && !userData.name.trim() && (
-                <div className="info-message">Set a username to enable host mode</div>
-              )}
-            </div>
+          <div className="profile-actions-container">
+            <button 
+              className="profile-button primary"
+              onClick={() => setIsEditMode(true)}
+              disabled={loading}
+            >
+              <i className="bi bi-pencil-square"></i> Edit Profile
+            </button>
+            <button 
+              className="profile-button toggle-host"
+              onClick={toggleHostMode}
+              disabled={loading || (userData.isHost === false && !userData.name.trim())}
+            >
+              {loading ? 'Updating...' : userData.isHost ? 
+                <><i className="bi bi-person"></i> Switch to Regular User</> : 
+                <><i className="bi bi-person-badge"></i> Switch to Host Mode</>}
+            </button>
+            <button 
+              className="profile-button logout"
+              onClick={handleLogout}
+              disabled={loading}
+            >
+              <i className="bi bi-box-arrow-right"></i> Logout
+            </button>
+            {!userData.isHost && !userData.name.trim() && (
+              <div className="info-message">Set a username to enable host mode</div>
+            )}
           </div>
         )}
         
-        <div className="profile-footer">
-          <button 
-            className="profile-button danger"
-            onClick={handleLogout}
-            disabled={loading}
-          >
-            Logout
-          </button>
-          <button 
-            className="profile-button danger"
-            onClick={handleEmergencyLogout}
-            disabled={loading}
-          >
-            Emergency Logout
-          </button>
-        </div>
-        
         {/* Debug information */}
-        <div className="debug-info" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '5px', fontSize: '12px' }}>
+        <div className="debug-info">
           <details>
-            <summary>Debug Info</summary>
-            <p>User ID: {user?.id}</p>
-            <p>Email: {user?.email}</p>
-            <p>Loading: {loading.toString()}</p>
-            <p>Fetch Attempts: {profileFetchAttempts}</p>
-            <p>User Data: {JSON.stringify(userData)}</p>
-            <button 
-              onClick={handleRetryFetch}
-              className="profile-button secondary"
-              style={{ marginTop: '10px', fontSize: '12px', padding: '5px 10px' }}
-            >
-              Retry Fetch
-            </button>
-            <button 
-              onClick={() => window.checkSupabaseAuth && window.checkSupabaseAuth()}
-              className="profile-button secondary"
-              style={{ marginTop: '10px', marginLeft: '10px', fontSize: '12px', padding: '5px 10px' }}
-            >
-              Check Auth
-            </button>
-            <button 
-              onClick={handleEmergencyLogout}
-              className="profile-button danger"
-              style={{ marginTop: '10px', marginLeft: '10px', fontSize: '12px', padding: '5px 10px' }}
-            >
-              Emergency Logout
-            </button>
+            <summary><i className="bi bi-bug"></i> Debug Info</summary>
+            <div className="debug-content">
+              <p><strong>User ID:</strong> {user?.id}</p>
+              <p><strong>Email:</strong> {user?.email}</p>
+              <p><strong>Loading:</strong> {loading.toString()}</p>
+              <p><strong>Fetch Attempts:</strong> {profileFetchAttempts}</p>
+              <p><strong>User Data:</strong> {JSON.stringify(userData)}</p>
+              <div className="debug-actions">
+                <button 
+                  onClick={handleRetryFetch}
+                  className="profile-button secondary"
+                >
+                  <i className="bi bi-arrow-clockwise"></i> Retry Fetch
+                </button>
+                <button 
+                  onClick={() => window.checkSupabaseAuth && window.checkSupabaseAuth()}
+                  className="profile-button secondary"
+                >
+                  <i className="bi bi-shield-check"></i> Check Auth
+                </button>
+                <button 
+                  onClick={handleEmergencyLogout}
+                  className="profile-button danger"
+                >
+                  <i className="bi bi-exclamation-triangle"></i> Emergency Logout
+                </button>
+              </div>
+            </div>
           </details>
         </div>
       </div>
