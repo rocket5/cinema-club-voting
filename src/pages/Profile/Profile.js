@@ -141,11 +141,16 @@ function Profile() {
             // If the profile doesn't exist, create one
             if (error.code === '42P01' || error.message.includes('does not exist') || error.code === 'PGRST116') {
               console.log('Creating new profile for user:', user.id);
+              
+              // Extract username from user metadata if available
+              const username = user.user_metadata?.username || user.email?.split('@')[0] || '';
+              
               const { data: newProfile, error: createError } = await supabase
                 .from('profiles')
                 .upsert({
                   id: user.id,
-                  name: '',
+                  name: user.user_metadata?.name || username || '',
+                  username: username,
                   is_host: false,
                   created_at: new Date(),
                   updated_at: new Date()

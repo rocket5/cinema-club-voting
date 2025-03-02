@@ -216,6 +216,7 @@ class AuthService {
       const profileData = {
         id: userId,
         name: userData?.name || userData?.username || '',
+        username: userData?.username || userData?.name || '',
         is_host: false,
         created_at: new Date(),
         updated_at: new Date()
