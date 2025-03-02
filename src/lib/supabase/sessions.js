@@ -36,77 +36,140 @@ const extractDateString = (dateObj) => {
  */
 const getSessions = async () => {
   try {
-    // Get all sessions
-    const { data, error } = await supabase
+    console.log('Getting sessions from Supabase...');
+    
+    // Debug: Check profiles table structure
+    try {
+      console.log('Checking profiles table structure...');
+      const { data: profilesInfo, error: profilesInfoError } = await supabase
+        .from('profiles')
+        .select('*')
+        .limit(5);
+      
+      if (profilesInfoError) {
+        console.error('Error checking profiles table structure:', profilesInfoError);
+      } else if (profilesInfo && profilesInfo.length > 0) {
+        console.log('Profiles table first row:', JSON.stringify(profilesInfo[0], null, 2));
+        console.log('Profiles table columns:', Object.keys(profilesInfo[0]));
+        
+        // Check if there are any non-null values for each column
+        const columnStats = {};
+        Object.keys(profilesInfo[0]).forEach(column => {
+          columnStats[column] = {
+            nullCount: 0,
+            nonNullCount: 0,
+            examples: []
+          };
+        });
+        
+        profilesInfo.forEach(profile => {
+          Object.keys(profile).forEach(column => {
+            if (profile[column] === null) {
+              columnStats[column].nullCount++;
+            } else {
+              columnStats[column].nonNullCount++;
+              if (columnStats[column].examples.length < 2) {
+                columnStats[column].examples.push(profile[column]);
+              }
+            }
+          });
+        });
+        
+        console.log('Column statistics:', JSON.stringify(columnStats, null, 2));
+      } else {
+        console.log('No profiles found');
+      }
+    } catch (profilesInfoError) {
+      console.error('Exception checking profiles table structure:', profilesInfoError);
+    }
+    
+    // Get all sessions from the database
+    const { data: sessionsData, error } = await supabase
       .from('sessions')
       .select('*')
       .order('created_at', { ascending: false });
     
     if (error) {
+      console.error('Error getting sessions:', error);
       throw error;
     }
     
-    // Process each session to ensure consistent structure
-    const sessions = data.map(session => {
-      if (!session || !session.id) return null;
-      
-      // Extract date from either startDate or createdAt
-      const dateStr = extractDateString(session.start_date) || 
-                     extractDateString(session.created_at);
-      
-      return {
-        id: session.id,
-        sessionName: session.name || null,
-        startDate: dateStr,
-        status: session.status || 'active',
-        hostId: session.host_id || 'unknown',
-        winningMovie: session.winning_movie || null
-      };
-    }).filter(Boolean); // Remove any null entries
+    if (!sessionsData || sessionsData.length === 0) {
+      console.log('No sessions found');
+      return [];
+    }
     
-    console.log('Sessions before fetching host data:', sessions);
+    console.log(`Found ${sessionsData.length} sessions`);
     
-    // For each session, try to get the host's username
+    // Convert snake_case to camelCase
+    const sessions = sessionsData.map(session => ({
+      id: session.id,
+      sessionName: session.name,
+      startDate: extractDateString(session.start_date),
+      endDate: extractDateString(session.end_date),
+      status: session.status || 'active',
+      hostId: session.host_id,
+      winningMovie: session.winning_movie,
+      createdAt: extractDateString(session.created_at)
+    }));
+    
+    // Process each session to include host information
     for (const session of sessions) {
       try {
-        // Use our Netlify function to get user data
-        const url = `/.netlify/functions/get-user?userId=${session.hostId}`;
-        console.log('Fetching host data from:', url);
-        
-        const response = await fetch(url);
-        console.log('Host data response status:', response.status);
-        
-        if (response.ok) {
-          const responseText = await response.text();
-          console.log('Host data response text:', responseText);
+        // Instead of using fetch to call the Netlify function, query the profiles table directly
+        if (session.hostId) {
+          console.log(`Getting host info for session ${session.id} with hostId ${session.hostId}`);
           
-          try {
-            const data = JSON.parse(responseText);
-            console.log('Parsed host data:', data);
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('id, name, username')
+            .eq('id', session.hostId)
+            .single();
+          
+          if (profileError) {
+            console.error(`Error fetching profile for session ${session.id}:`, profileError);
+            // Create a user-friendly ID from the UUID
+            const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+            session.hostUsername = `User ${shortId}`;
+            session.displayName = session.hostUsername;
+          } else if (profile) {
+            console.log(`Profile data for session ${session.id}:`, profile);
             
-            if (data.user && data.user.username) {
-              session.hostUsername = data.user.username;
-              console.log('Set hostUsername to:', session.hostUsername);
+            // Use username or name, with fallback to user ID
+            if (profile.username) {
+              session.hostUsername = profile.username;
+            } else if (profile.name) {
+              session.hostUsername = profile.name;
             } else {
-              console.log('No username found in response data:', data);
+              const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+              session.hostUsername = `User ${shortId}`;
             }
-          } catch (parseError) {
-            console.error('Error parsing host data JSON:', parseError);
+            session.displayName = session.hostUsername;
+            
+            console.log(`Set hostUsername for session ${session.id} to ${session.hostUsername}`);
+          } else {
+            console.log(`No profile found for hostId ${session.hostId}`);
+            const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+            session.hostUsername = `User ${shortId}`;
+            session.displayName = session.hostUsername;
           }
         } else {
-          console.error('Error response from get-user:', response.status);
+          console.log(`Session ${session.id} has no hostId`);
+          session.hostUsername = 'Unknown User';
+          session.displayName = 'Unknown User';
         }
       } catch (err) {
-        console.error('Error fetching host data for session:', session.id, err);
-        // Continue without host username
+        console.error(`Error processing host data for session ${session.id}:`, err);
+        const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+        session.hostUsername = `User ${shortId}`;
+        session.displayName = session.hostUsername;
       }
     }
     
-    console.log('Final sessions with host data:', sessions);
     return sessions;
   } catch (error) {
-    console.error('Error getting sessions:', error);
-    throw new Error(`Failed to get sessions: ${error.message}`);
+    console.error('Error in getSessions:', error);
+    throw error;
   }
 };
 
@@ -141,36 +204,52 @@ const getSessionById = async (id) => {
     
     // Try to get the host's username
     try {
-      // Use our Netlify function to get user data
-      const url = `/.netlify/functions/get-user?userId=${session.hostId}`;
-      console.log('Fetching host data from:', url);
-      
-      const response = await fetch(url);
-      console.log('Host data response status:', response.status);
-      
-      if (response.ok) {
-        const responseText = await response.text();
-        console.log('Host data response text:', responseText);
+      if (session.hostId) {
+        console.log(`Getting host info for session ${session.id} with hostId ${session.hostId}`);
         
-        try {
-          const data = JSON.parse(responseText);
-          console.log('Parsed host data:', data);
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, name, username')
+          .eq('id', session.hostId)
+          .single();
+        
+        if (profileError) {
+          console.error(`Error fetching profile for session ${session.id}:`, profileError);
+          // Create a user-friendly ID from the UUID
+          const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+          session.hostUsername = `User ${shortId}`;
+          session.displayName = session.hostUsername;
+        } else if (profile) {
+          console.log(`Profile data for session ${session.id}:`, profile);
           
-          if (data.user && data.user.username) {
-            session.hostUsername = data.user.username;
-            console.log('Set hostUsername to:', session.hostUsername);
+          // Use username or name, with fallback to user ID
+          if (profile.username) {
+            session.hostUsername = profile.username;
+          } else if (profile.name) {
+            session.hostUsername = profile.name;
           } else {
-            console.log('No username found in response data:', data);
+            const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+            session.hostUsername = `User ${shortId}`;
           }
-        } catch (parseError) {
-          console.error('Error parsing host data JSON:', parseError);
+          session.displayName = session.hostUsername;
+          
+          console.log(`Set hostUsername for session ${session.id} to ${session.hostUsername}`);
+        } else {
+          console.log(`No profile found for hostId ${session.hostId}`);
+          const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+          session.hostUsername = `User ${shortId}`;
+          session.displayName = session.hostUsername;
         }
       } else {
-        console.error('Error response from get-user:', response.status);
+        console.log(`Session ${session.id} has no hostId`);
+        session.hostUsername = 'Unknown User';
+        session.displayName = 'Unknown User';
       }
     } catch (err) {
       console.error('Error fetching host data for session:', session.id, err);
-      // Continue without host username
+      const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+      session.hostUsername = `User ${shortId}`;
+      session.displayName = session.hostUsername;
     }
     
     console.log('Final session with host data:', session);

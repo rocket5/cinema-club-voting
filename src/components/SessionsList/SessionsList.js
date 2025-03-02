@@ -1,8 +1,71 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase/client';
 
 function SessionsList({ sessions, loading, error, isHostMode }) {
     const navigate = useNavigate();
+    const [sessionsWithUsers, setSessionsWithUsers] = useState([]);
+    
+    // Fetch user information for sessions when they load
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            if (!sessions || sessions.length === 0) return;
+            
+            const updatedSessions = [...sessions];
+            
+            for (let i = 0; i < updatedSessions.length; i++) {
+                const session = updatedSessions[i];
+                
+                // Skip if we don't have a hostId
+                if (!session.hostId || session.hostId === 'unknown') continue;
+                
+                try {
+                    console.log(`Fetching user info for session ${session.id} with hostId ${session.hostId}`);
+                    
+                    // Try to get user from profiles table directly
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('username, name')
+                        .eq('id', session.hostId)
+                        .single();
+                    
+                    if (profileError) {
+                        console.error(`Error fetching profile for session ${session.id}:`, profileError);
+                        // Create a user-friendly ID from the UUID
+                        const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+                        updatedSessions[i] = {
+                            ...session,
+                            displayName: `User ${shortId}`
+                        };
+                    } else if (profile) {
+                        console.log(`Profile data for session ${session.id}:`, profile);
+                        
+                        // Use username or create a user-friendly ID from the UUID
+                        let displayName;
+                        if (profile.username) {
+                            displayName = profile.username;
+                        } else {
+                            const shortId = session.hostId ? session.hostId.substring(0, 8) : 'unknown';
+                            displayName = `User ${shortId}`;
+                        }
+                        
+                        updatedSessions[i] = {
+                            ...session,
+                            displayName: displayName
+                        };
+                        
+                        console.log(`Updated session ${session.id} with displayName ${displayName}`);
+                    }
+                } catch (err) {
+                    console.error(`Error fetching user for session ${session.id}:`, err);
+                }
+            }
+            
+            setSessionsWithUsers(updatedSessions);
+        };
+        
+        fetchUserInfo();
+    }, [sessions]);
     
     if (loading) {
         return <div className="loading">Loading sessions...</div>;
@@ -15,6 +78,19 @@ function SessionsList({ sessions, loading, error, isHostMode }) {
     if (!sessions || sessions.length === 0) {
         return <div className="no-sessions">No sessions available</div>;
     }
+    
+    // Use sessionsWithUsers if available, otherwise fall back to the original sessions
+    const displaySessions = sessionsWithUsers.length > 0 ? sessionsWithUsers : sessions;
+    
+    // Debug log all sessions with detailed information
+    console.log('All sessions (detailed):', displaySessions.map(session => ({
+        id: session.id,
+        sessionName: session.sessionName,
+        hostId: session.hostId,
+        hostUsername: session.hostUsername,
+        displayName: session.displayName,
+        allKeys: Object.keys(session)
+    })));
     
     const formatDate = (dateValue) => {
         // If null or undefined, return unknown
@@ -124,18 +200,24 @@ function SessionsList({ sessions, loading, error, isHostMode }) {
         navigate(`/session/${sessionId}`);
     };
     
-    // Debug log all sessions
-    console.log('All sessions:', sessions);
-    
     return (
         <div className="sessions-list">
             <h2>{isHostMode ? 'Manage Sessions' : 'Available Sessions'}</h2>
-            {sessions.map(session => {
+            {displaySessions.map(session => {
                 // Skip rendering if session is invalid
                 if (!session || !session.id) {
                     console.warn('Skipping invalid session:', session);
                     return null;
                 }
+                
+                // Debug log for each session being rendered
+                console.log(`Rendering session ${session.id}:`, {
+                    hostId: session.hostId,
+                    hostUsername: session.hostUsername,
+                    displayName: session.displayName,
+                    createdBy: session.createdBy,
+                    addedBy: session.addedBy
+                });
                 
                 return (
                     <div 
@@ -149,11 +231,9 @@ function SessionsList({ sessions, loading, error, isHostMode }) {
                             </h3>
                             <p className="session-meta">
                                 Created: {formatDate(session.startDate || session.createdAt)}
-                                {session.hostUsername && (
-                                    <span className="session-host">
-                                        {' '}by {session.hostUsername}
-                                    </span>
-                                )}
+                            </p>
+                            <p className="session-creator text-muted small">
+                                <strong>Created by:</strong> {session.displayName || session.hostUsername || 'Unknown User'}
                             </p>
                         </div>
                         <span className={`session-status status-${session.status || 'active'}`}>

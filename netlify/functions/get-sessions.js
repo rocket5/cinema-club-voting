@@ -19,8 +19,18 @@ exports.handler = async (event, context) => {
         
         // Use the getSessions function from our Supabase library
         const sessions = await getSessions();
-
-        console.log('Returning sessions:', sessions);
+        
+        console.log(`Retrieved ${sessions ? sessions.length : 0} sessions`);
+        
+        if (sessions && sessions.length > 0) {
+            console.log('First session sample:', {
+                id: sessions[0].id,
+                sessionName: sessions[0].sessionName,
+                hostId: sessions[0].hostId,
+                hostUsername: sessions[0].hostUsername,
+                displayName: sessions[0].displayName
+            });
+        }
 
         return {
             statusCode: 200,
