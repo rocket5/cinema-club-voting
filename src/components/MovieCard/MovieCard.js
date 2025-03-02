@@ -31,11 +31,17 @@ function MovieCard({
   return (
     <div className="movie-card card h-100">
       <div className="poster-container">
-        <img 
-          src={movie.poster || movie.imageUrl || 'https://via.placeholder.com/300x450'} 
-          className="card-img-top" 
-          alt={movie.title}
-        />
+        {movie.poster || movie.imageUrl ? (
+          <img 
+            src={movie.poster || movie.imageUrl} 
+            className="card-img-top" 
+            alt={movie.title}
+          />
+        ) : (
+          <div className="no-poster-placeholder">
+            <span>No Image Available</span>
+          </div>
+        )}
       </div>
       <div className="card-body d-flex flex-column">
         <h5 className="card-title">{movie.title}</h5>

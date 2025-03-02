@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import VoteButton from '../../components/RankInput/RankInput';
 import './MovieDetail.css';
+// Import icons
+import { FaArrowLeft, FaPencilAlt } from 'react-icons/fa';
 
 function MovieDetail() {
   const { id } = useParams();
@@ -73,9 +75,10 @@ function MovieDetail() {
   
   if (loading) {
     return (
-      <div className="container py-4 text-center">
-        <div className="spinner-border" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <div className="movie-detail-container">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading movie details...</p>
         </div>
       </div>
     );
@@ -83,21 +86,26 @@ function MovieDetail() {
   
   if (error) {
     return (
-      <div className="container py-4">
-        <div className="alert alert-danger" role="alert">
+      <div className="movie-detail-container">
+        <div className="error-container">
+          <h3>Error</h3>
           <p>{error}</p>
-          <button 
-            className="btn btn-danger mt-2"
-            onClick={handleRetry}
-          >
-            Retry
-          </button>
-          <button 
-            className="btn btn-outline-secondary mt-2 ms-2"
-            onClick={() => navigate(-1)}
-          >
-            Go Back
-          </button>
+          <div className="action-buttons">
+            <button 
+              className="btn-secondary"
+              onClick={() => navigate(-1)}
+            >
+              <FaArrowLeft className="btn-icon" />
+              Back to Search
+            </button>
+            <button 
+              className="btn-primary"
+              onClick={handleRetry}
+            >
+              <i className="bi bi-arrow-clockwise btn-icon"></i>
+              Retry
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -106,14 +114,16 @@ function MovieDetail() {
   // If no movie data is available yet, use fallback data for display
   if (!movie) {
     return (
-      <div className="container py-4">
-        <div className="alert alert-warning" role="alert">
-          <p>Movie not found. The movie may have been deleted or the ID is invalid.</p>
+      <div className="movie-detail-container">
+        <div className="error-container">
+          <h3>Movie Not Found</h3>
+          <p>The movie may have been deleted or the ID is invalid.</p>
           <button 
-            className="btn btn-outline-secondary mt-2"
+            className="btn-secondary"
             onClick={() => navigate(-1)}
           >
-            Go Back
+            <FaArrowLeft className="btn-icon" />
+            Back to Search
           </button>
         </div>
       </div>
@@ -121,49 +131,130 @@ function MovieDetail() {
   }
 
   return (
-    <div className="container py-4">
-      <button 
-        className="btn btn-outline-secondary mb-4"
-        onClick={() => navigate(-1)}
-      >
-        ← Back
-      </button>
-      
-      <div className="row">
-        <div className="col-md-4 mb-4">
-          {movie.poster && movie.poster !== 'N/A' ? (
-            <img 
-              src={movie.poster} 
-              alt={movie.title}
-              className="img-fluid rounded shadow movie-poster"
-            />
-          ) : (
-            <div className="no-poster-placeholder">
-              <span>No Image Available</span>
-            </div>
+    <div className="movie-detail-container">
+      <div className="action-buttons">
+        <button 
+          className="btn-secondary"
+          onClick={() => navigate(-1)}
+        >
+          <FaArrowLeft className="btn-icon" />
+          Back to Search
+        </button>
+        <div className="action-buttons-right">
+          {movie.sessionId && (
+            <button 
+              className="btn-primary"
+              onClick={() => navigate(`/session/${movie.sessionId}/edit/${id}`)}
+            >
+              <FaPencilAlt className="btn-icon" />
+              Edit Details
+            </button>
           )}
         </div>
-        <div className="col-md-8">
-          <h1 className="mb-3">{movie.title} {movie.year && <span className="text-muted">({movie.year})</span>}</h1>
+      </div>
+      
+      <div className="details-section">
+        <div className="movie-header">
+          <h1 className="movie-title">
+            {movie.title} 
+            {movie.year && <span className="movie-year">({movie.year})</span>}
+          </h1>
           
-          <div className="movie-meta mb-4">
-            {movie.genre && <span className="badge bg-secondary me-2">{movie.genre}</span>}
-            {movie.director && <p className="mb-1"><strong>Director:</strong> {movie.director}</p>}
-            {movie.imdbRating && (
-              <div className="imdb-rating mb-2">
-                <span className="badge bg-warning text-dark">
-                  <i className="bi bi-star-fill me-1"></i> 
-                  {movie.imdbRating}/10
-                </span>
+          <div className="movie-meta-info">
+            <div className="movie-rating-container">
+              {movie.imdbRating && (
+                <div className="rating">
+                  <span className="rating-source">Internet Movie Database:</span>
+                  <span className="rating-value">{movie.imdbRating}/10</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <div className="movie-content-grid">
+          <div className="movie-poster-container">
+            {movie.poster && movie.poster !== 'N/A' ? (
+              <img 
+                src={movie.poster} 
+                alt={movie.title}
+                className="movie-poster"
+              />
+            ) : (
+              <div className="no-poster-placeholder">
+                <span>No Image Available</span>
               </div>
             )}
           </div>
           
-          <h5>Description</h5>
-          <p className="movie-description">{movie.description}</p>
-          
-          <div className="added-by mt-4">
-            <small className="text-muted">Added by: {movie.displayName || movie.addedBy || 'Unknown'}</small>
+          <div className="movie-details">
+            <div className="movie-info-section">
+              <div className="movie-info-grid">
+                {movie.runtime && (
+                  <div className="movie-info-item">
+                    <span className="movie-info-label">Runtime:</span>
+                    <span className="movie-info-value">{movie.runtime}</span>
+                  </div>
+                )}
+                
+                {movie.rated && (
+                  <div className="movie-info-item">
+                    <span className="movie-info-label">Rated:</span>
+                    <span className="movie-info-value">{movie.rated}</span>
+                  </div>
+                )}
+                
+                {movie.released && (
+                  <div className="movie-info-item">
+                    <span className="movie-info-label">Released:</span>
+                    <span className="movie-info-value">{movie.released}</span>
+                  </div>
+                )}
+              </div>
+              
+              {movie.genre && (
+                <div className="movie-info-item genre-container">
+                  <span className="movie-info-label">Genre:</span>
+                  <div className="genre-badges">
+                    {movie.genre.split(',').map((genre, index) => (
+                      <span key={index} className="genre-badge">{genre.trim()}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {movie.director && (
+                <div className="movie-info-item">
+                  <span className="movie-info-label">Director:</span>
+                  <span className="movie-info-value">{movie.director}</span>
+                </div>
+              )}
+              
+              {movie.actors && (
+                <div className="movie-info-item">
+                  <span className="movie-info-label">Cast:</span>
+                  <span className="movie-info-value">{movie.actors}</span>
+                </div>
+              )}
+              
+              {movie.description && (
+                <div className="movie-info-item description-container">
+                  <h3 className="section-title">Plot</h3>
+                  <p className="movie-description">{movie.description}</p>
+                </div>
+              )}
+              
+              {movie.awards && (
+                <div className="movie-info-item">
+                  <h3 className="section-title">Awards</h3>
+                  <p className="movie-awards">{movie.awards}</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="added-by">
+              <span>Added by: {movie.displayName || movie.addedBy || 'Unknown'}</span>
+            </div>
           </div>
         </div>
       </div>
