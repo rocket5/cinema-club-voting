@@ -28,6 +28,11 @@ function MovieCard({
     navigate(`/movie/${movie.id}`);
   };
 
+  // Prevent event propagation when interacting with the RankInput
+  const handleRankInputClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="movie-card card h-100" onClick={handleView} style={{ cursor: 'pointer' }}>
       <div className="poster-container">
@@ -72,7 +77,7 @@ function MovieCard({
               {/* Host mode buttons removed as requested */}
             </div>
           ) : (
-            <div className="voter-actions">
+            <div className="voter-actions" onClick={handleRankInputClick}>
               <RankInput 
                 movieId={movie.id}
                 totalMovies={totalMovies}
