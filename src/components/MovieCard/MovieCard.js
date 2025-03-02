@@ -29,7 +29,7 @@ function MovieCard({
   };
 
   return (
-    <div className="movie-card card h-100">
+    <div className="movie-card card h-100" onClick={handleView} style={{ cursor: 'pointer' }}>
       <div className="poster-container">
         {movie.poster || movie.imageUrl ? (
           <img 
@@ -52,12 +52,7 @@ function MovieCard({
           {movie.genre ? (
             <span className="genre-badge">{movie.genre.split(',')[0]}</span>
           ) : null}
-          {movie.imdbRating ? (
-            <span className="rating-badge-inline me-2">
-              <i className="bi bi-star-fill me-1"></i>
-              {movie.imdbRating}
-            </span>
-          ) : null}
+          
         </div>
         {movie.director && (
           <p className="card-text text-muted small mb-2">
@@ -74,27 +69,7 @@ function MovieCard({
         <div className="mt-auto">
           {isHostMode ? (
             <div className="d-flex gap-2">
-              <button 
-                onClick={handleView} 
-                className="btn btn-outline-primary flex-grow-1"
-                title="View movie details"
-              >
-                <i className="bi bi-eye"></i>
-              </button>
-              <button 
-                onClick={handleEdit} 
-                className="btn btn-outline-secondary flex-grow-1"
-                title="Edit movie"
-              >
-                <i className="bi bi-pencil"></i>
-              </button>
-              <button 
-                onClick={() => onDelete?.(movie.id)} 
-                className="btn btn-outline-danger"
-                title="Delete movie"
-              >
-                <i className="bi bi-trash"></i>
-              </button>
+              {/* Host mode buttons removed as requested */}
             </div>
           ) : (
             <div className="voter-actions">
@@ -104,12 +79,7 @@ function MovieCard({
                 currentRank={currentRank}
                 onRankChange={onRankChange}
               />
-              <button 
-                onClick={handleView} 
-                className="btn btn-primary mt-2 w-100"
-              >
-                <i className="bi bi-eye me-2"></i> View Details
-              </button>
+              {/* View Details button removed in vote mode as requested */}
             </div>
           )}
         </div>

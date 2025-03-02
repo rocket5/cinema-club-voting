@@ -55,7 +55,7 @@
 
 .year-badge {
   background-color: #6c757d;
-  color: white;
+  color: black;
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -63,7 +63,7 @@
 
 .genre-badge {
   background-color: #17a2b8;
-  color: white;
+  color: black;
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -80,7 +80,7 @@
 
 .movie-description {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: black;
   margin-bottom: 1rem;
 }
 
