@@ -5,25 +5,12 @@
   padding: 1rem;
 }
 
-.back-button {
-  display: inline-block;
-  margin-bottom: 1.5rem;
-  padding: 0.5rem 1rem;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  color: #212529;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.back-button:hover {
-  background-color: #e9ecef;
-}
-
 .movie-details-content {
   display: flex;
   gap: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .movie-details-poster {
@@ -35,6 +22,11 @@
   height: auto;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.movie-details-poster img:hover {
+  transform: scale(1.02);
 }
 
 .no-poster {
@@ -46,16 +38,19 @@
   background-color: #f8f9fa;
   border-radius: 8px;
   color: #6c757d;
+  font-style: italic;
 }
 
 .movie-details-info {
   flex: 1;
+  padding: 1.5rem;
 }
 
 .movie-details-info h1 {
   margin: 0 0 1rem 0;
   font-size: 2rem;
-  color: #212529;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
 .movie-year {
@@ -71,6 +66,13 @@
   color: #6c757d;
 }
 
+.movie-meta span {
+  background-color: #f8f9fa;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
 .movie-ratings {
   display: flex;
   flex-wrap: wrap;
@@ -83,8 +85,14 @@
   flex-direction: column;
   background-color: #f8f9fa;
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: 8px;
   min-width: 120px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rating:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .rating-source {
@@ -96,22 +104,28 @@
 
 .rating-value {
   font-size: 1.1rem;
-  color: #212529;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
 .movie-plot {
   margin-bottom: 1.5rem;
+  background-color: #f8f9fa;
+  padding: 1.2rem;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
 }
 
 .movie-plot h3 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.8rem 0;
   font-size: 1.25rem;
-  color: #212529;
+  color: #2c3e50;
 }
 
 .movie-plot p {
   line-height: 1.6;
-  color: #212529;
+  color: #2c3e50;
+  margin: 0;
 }
 
 .movie-people {
@@ -121,42 +135,62 @@
   margin-bottom: 1.5rem;
 }
 
+.movie-person {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.movie-person:hover {
+  transform: translateY(-2px);
+}
+
 .movie-person h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
-  color: #212529;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
 .movie-person p {
   color: #495057;
+  margin: 0;
 }
 
 .movie-awards h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
-  color: #212529;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
 .movie-awards p {
   color: #495057;
   background-color: #fff3cd;
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: 8px;
   border-left: 4px solid #ffc107;
+  margin: 0;
 }
 
 .movie-details-loading {
   padding: 2rem;
   text-align: center;
   color: #6c757d;
+  font-size: 1.1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 1rem;
 }
 
 .movie-details-error {
   padding: 1.5rem;
-  color: #dc3545;
+  color: #e74c3c;
   background-color: #f8d7da;
-  border-radius: 4px;
-  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border-left: 4px solid #e74c3c;
 }
 
 /* Responsive adjustments */
@@ -171,12 +205,25 @@
     margin: 0 auto 1.5rem;
   }
   
+  .movie-details-info {
+    padding: 1rem;
+  }
+  
   .movie-details-info h1 {
     font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .movie-meta {
+    justify-content: center;
   }
   
   .rating {
     min-width: 100px;
+  }
+  
+  .movie-people {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -192,10 +239,17 @@
   
   .movie-ratings {
     gap: 0.75rem;
+    justify-content: center;
   }
   
   .rating {
     min-width: 90px;
     padding: 0.5rem;
+  }
+  
+  .movie-plot,
+  .movie-person,
+  .movie-awards p {
+    padding: 0.8rem;
   }
 } 

@@ -48,7 +48,7 @@ function MovieDetails({ movieId, onBack, onDetailsLoaded }) {
 
   return (
     <div className="movie-details-container">
-      <button onClick={onBack} className="back-button">← Back to Search</button>
+      {/* Removed back button since it's now in the parent component */}
       
       <div className="movie-details-content">
         <div className="movie-details-poster">
