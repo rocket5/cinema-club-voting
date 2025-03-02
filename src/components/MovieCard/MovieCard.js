@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import RankInput from '../RankInput/RankInput';
+import './MovieCard.css'; // Add CSS import
 
 function MovieCard({ 
   movie, 
@@ -28,27 +29,28 @@ function MovieCard({
   };
 
   return (
-    <div className="card h-100 shadow-sm">
-      <img 
-        src={movie.poster || movie.imageUrl || 'https://via.placeholder.com/300x450'} 
-        className="card-img-top" 
-        alt={movie.title}
-        style={{ height: '300px', objectFit: 'cover' }}
-      />
+    <div className="movie-card card h-100">
+      <div className="poster-container">
+        <img 
+          src={movie.poster || movie.imageUrl || 'https://via.placeholder.com/300x450'} 
+          className="card-img-top" 
+          alt={movie.title}
+        />
+      </div>
       <div className="card-body d-flex flex-column">
         <h5 className="card-title">{movie.title}</h5>
         <div className="movie-meta mb-2">
           {movie.year || movie.releaseYear ? (
-            <span className="badge bg-secondary me-2">{movie.year || movie.releaseYear}</span>
+            <span className="year-badge me-2">{movie.year || movie.releaseYear}</span>
+          ) : null}
+          {movie.genre ? (
+            <span className="genre-badge">{movie.genre.split(',')[0]}</span>
           ) : null}
           {movie.imdbRating ? (
-            <span className="badge bg-warning text-dark me-2">
+            <span className="rating-badge-inline me-2">
               <i className="bi bi-star-fill me-1"></i>
               {movie.imdbRating}
             </span>
-          ) : null}
-          {movie.genre ? (
-            <span className="badge bg-info text-dark">{movie.genre.split(',')[0]}</span>
           ) : null}
         </div>
         {movie.director && (
@@ -59,7 +61,7 @@ function MovieCard({
         <p className="card-text text-muted small mb-2">
           <strong>Added by:</strong> {movie.displayName || movie.addedBy}
         </p>
-        <p className="card-text flex-grow-1">
+        <p className="card-text flex-grow-1 movie-description">
           {movie.description?.substring(0, 100)}
           {movie.description?.length > 100 ? '...' : ''}
         </p>
@@ -89,7 +91,7 @@ function MovieCard({
               </button>
             </div>
           ) : (
-            <>
+            <div className="voter-actions">
               <RankInput 
                 movieId={movie.id}
                 totalMovies={totalMovies}
@@ -98,11 +100,11 @@ function MovieCard({
               />
               <button 
                 onClick={handleView} 
-                className="btn btn-outline-primary mt-2 w-100"
+                className="btn btn-primary mt-2 w-100"
               >
                 <i className="bi bi-eye me-2"></i> View Details
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>

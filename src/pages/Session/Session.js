@@ -88,46 +88,72 @@ function Session() {
         navigate(`/session/${sessionId}/edit/${movieId}`);
     };
 
-    if (loading) return <div className="container mt-4"><div className="text-center">Loading...</div></div>;
+    if (loading) {
+        return (
+            <div className="session-container">
+                <div className="container">
+                    <div className="loading-container">
+                        <div className="spinner-border loading-spinner text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     
     return (
-        <div className="container mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1>{sessionData?.sessionName || 'Movie Voting Session'}</h1>
-                    <p className="text-muted">
-                        Session ID: {sessionId}
-                        {sessionData?.displayName && (
-                            <span> | Created by: {sessionData.displayName}</span>
+        <div className="session-container">
+            <div className="container">
+                <div className="session-header">
+                    <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h1 className="session-title">{sessionData?.sessionName || 'Movie Voting Session'}</h1>
+                            <div className="session-meta">
+                                {sessionData?.displayName && (
+                                    <span>Created by: {sessionData.displayName}</span>
+                                )}
+                                {movies.length > 0 && (
+                                    <>
+                                        {sessionData?.displayName && <span className="separator"></span>}
+                                        <span>{movies.length} movie{movies.length !== 1 ? 's' : ''}</span>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {isHostMode && (
+                            <Link to={`/session/${sessionId}/add`} className="btn btn-primary add-movie-btn">
+                                <i className="bi bi-plus-lg"></i>
+                                Add New Movie
+                            </Link>
                         )}
-                    </p>
+                    </div>
                 </div>
-                
-                {isHostMode && (
-                    <Link to={`/session/${sessionId}/add`} className="btn btn-primary">
-                        Add New Movie
-                    </Link>
+
+                {error ? (
+                    <div className="error-container">
+                        <h4 className="text-danger mb-3">Error Loading Movies</h4>
+                        <p>{error}</p>
+                        <button onClick={() => window.location.reload()} className="btn btn-danger retry-btn">
+                            <i className="bi bi-arrow-clockwise me-2"></i>
+                            Retry
+                        </button>
+                    </div>
+                ) : (
+                    <div className="movies-grid">
+                        <MovieList 
+                            movies={movies}
+                            totalMovies={movies.length}
+                            rankings={rankings}
+                            onRankChange={handleRankChange}
+                            isHostMode={isHostMode}
+                            onDelete={handleDeleteMovie}
+                            onEdit={handleEditMovie}
+                        />
+                    </div>
                 )}
             </div>
-
-            {error ? (
-                <div className="alert alert-danger">
-                    <p>Error loading movies: {error}</p>
-                    <button onClick={() => window.location.reload()} className="btn btn-danger mt-2">
-                        Retry
-                    </button>
-                </div>
-            ) : (
-                <MovieList 
-                    movies={movies}
-                    totalMovies={movies.length}
-                    rankings={rankings}
-                    onRankChange={handleRankChange}
-                    isHostMode={isHostMode}
-                    onDelete={handleDeleteMovie}
-                    onEdit={handleEditMovie}
-                />
-            )}
         </div>
     );
 }

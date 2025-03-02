@@ -1,6 +1,61 @@
 /* Session.css */
+.session-container {
+    padding: 2rem 0;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
 .session-header {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.session-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #212529;
+}
+
+.session-meta {
+    color: #6c757d;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.session-meta .separator {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #adb5bd;
+    margin: 0 0.5rem;
+}
+
+.add-movie-btn {
+    background-color: #4361ee;
+    border-color: #4361ee;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+}
+
+.add-movie-btn:hover {
+    background-color: #3a56d4;
+    border-color: #3a56d4;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(67, 97, 238, 0.25);
+}
+
+.add-movie-btn i {
+    margin-right: 0.5rem;
 }
 
 .error-container {
@@ -8,18 +63,55 @@
     text-align: center;
     border: 1px solid #f8d7da;
     background-color: #fff5f5;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .retry-btn {
     margin-top: 1rem;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+}
+
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.25rem;
+}
+
+.movies-grid {
+    margin-top: 1.5rem;
 }
 
 /* Ensure mobile responsiveness */
 @media (max-width: 768px) {
+    .session-container {
+        padding: 1rem 0;
+    }
+    
+    .session-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+    }
+    
+    .session-title {
+        font-size: 1.75rem;
+    }
+    
     .container {
         padding-left: 1rem;
         padding-right: 1rem;
+    }
+    
+    .session-meta {
+        font-size: 0.9rem;
     }
 } 
