@@ -28,6 +28,7 @@ exports.handler = async (event, context) => {
                 title: doc.title,
                 description: doc.description,
                 addedBy: doc.addedBy,
+                displayName: doc.displayName || doc.addedBy, // Include display name
                 votes: doc.votes || 0,
                 sessionId: doc.sessionId,
                 // Include OMDB fields if they exist

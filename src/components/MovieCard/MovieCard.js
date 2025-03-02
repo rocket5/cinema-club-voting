@@ -56,6 +56,9 @@ function MovieCard({
             <strong>Director:</strong> {movie.director}
           </p>
         )}
+        <p className="card-text text-muted small mb-2">
+          <strong>Added by:</strong> {movie.displayName || movie.addedBy}
+        </p>
         <p className="card-text flex-grow-1">
           {movie.description?.substring(0, 100)}
           {movie.description?.length > 100 ? '...' : ''}

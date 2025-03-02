@@ -26,7 +26,8 @@ exports.handler = async (event, context) => {
             year,
             director,
             genre,
-            imdbRating 
+            imdbRating,
+            displayName
         } = data;
 
         if (!id || !title || !description) {
@@ -50,6 +51,7 @@ exports.handler = async (event, context) => {
         if (director) movieData.director = director;
         if (genre) movieData.genre = genre;
         if (imdbRating) movieData.imdbRating = imdbRating;
+        if (displayName) movieData.displayName = displayName;
         
         // Use the updateMovie function from our Supabase library
         const result = await updateMovie(id, movieData);

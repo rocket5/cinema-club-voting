@@ -149,6 +149,11 @@ function SessionsList({ sessions, loading, error, isHostMode }) {
                             </h3>
                             <p className="session-meta">
                                 Created: {formatDate(session.startDate || session.createdAt)}
+                                {session.hostUsername && (
+                                    <span className="session-host">
+                                        {' '}by {session.hostUsername}
+                                    </span>
+                                )}
                             </p>
                         </div>
                         <span className={`session-status status-${session.status || 'active'}`}>

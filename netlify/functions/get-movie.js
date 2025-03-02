@@ -35,11 +35,27 @@ exports.handler = async (event, context) => {
             };
         }
 
+        // Transform the movie object to include all necessary fields
+        const movieResponse = {
+            id: movie.id,
+            title: movie.title,
+            description: movie.description,
+            addedBy: movie.addedBy,
+            displayName: movie.displayName || movie.addedBy, // Include display name
+            sessionId: movie.sessionId,
+            // Include OMDB fields if they exist
+            poster: movie.poster || null,
+            year: movie.year || null,
+            director: movie.director || null,
+            genre: movie.genre || null,
+            imdbRating: movie.imdbRating || null
+        };
+
         return {
             statusCode: 200,
             body: JSON.stringify({
                 message: 'Movie fetched successfully',
-                movie: movie
+                movie: movieResponse
             })
         };
     } catch (error) {

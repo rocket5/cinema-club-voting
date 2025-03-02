@@ -95,7 +95,12 @@ function Session() {
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1>{sessionData?.sessionName || 'Movie Voting Session'}</h1>
-                    <p className="text-muted">Session ID: {sessionId}</p>
+                    <p className="text-muted">
+                        Session ID: {sessionId}
+                        {sessionData?.hostUsername && (
+                            <span> | Created by: {sessionData.hostUsername}</span>
+                        )}
+                    </p>
                 </div>
                 
                 {isHostMode && (

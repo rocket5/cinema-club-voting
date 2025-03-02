@@ -163,7 +163,7 @@ function MovieDetail() {
           <p className="movie-description">{movie.description}</p>
           
           <div className="added-by mt-4">
-            <small className="text-muted">Added by: {movie.addedBy || 'Unknown'}</small>
+            <small className="text-muted">Added by: {movie.displayName || movie.addedBy || 'Unknown'}</small>
           </div>
         </div>
       </div>

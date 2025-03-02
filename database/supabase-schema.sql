@@ -94,6 +94,13 @@ CREATE POLICY "Allow insert access to movies for authenticated users"
     TO authenticated
     WITH CHECK (auth.uid() = added_by);
 
+-- Add policy for anonymous users to insert movies
+CREATE POLICY "Allow insert access to movies for anonymous users"
+    ON public.movies
+    FOR INSERT
+    TO anon
+    WITH CHECK (true);
+
 CREATE POLICY "Allow update access to movies for owners"
     ON public.movies
     FOR UPDATE
@@ -106,6 +113,13 @@ CREATE POLICY "Allow delete access to movies for owners"
     FOR DELETE
     TO authenticated
     USING (auth.uid() = added_by);
+
+-- Add policy for anonymous users to read movies
+CREATE POLICY "Allow read access to all movies for anonymous users"
+    ON public.movies
+    FOR SELECT
+    TO anon
+    USING (true);
 
 -- Create policies for votes
 CREATE POLICY "Allow read access to all votes for authenticated users"
@@ -157,4 +171,11 @@ BEGIN
   ORDER BY 
     c.ordinal_position;
 END;
-$$ LANGUAGE plpgsql; 
+$$ LANGUAGE plpgsql;
+
+-- Add policy for anonymous users to read sessions
+CREATE POLICY "Allow read access to all sessions for anonymous users"
+    ON public.sessions
+    FOR SELECT
+    TO anon
+    USING (true);

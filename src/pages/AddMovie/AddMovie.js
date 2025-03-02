@@ -1,16 +1,20 @@
 // src/pages/AddMovie.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // Import useAuth
 import MovieSearch from '../../components/MovieSearch/MovieSearch';
 import MovieDetails from '../../components/MovieDetails/MovieDetails';
+import { supabase } from '../../lib/supabase/client'; // Import supabase client
 import './AddMovie.css'; // Make sure this file exists
 
 function AddMovie() {
     const { sessionId, movieId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth(); // Get the authenticated user
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [addedBy, setAddedBy] = useState('');
+    const [userProfile, setUserProfile] = useState(null); // Add state for user profile
     const [poster, setPoster] = useState('');
     const [year, setYear] = useState('');
     const [director, setDirector] = useState('');
@@ -21,6 +25,44 @@ function AddMovie() {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // Set user information when user is available
+    useEffect(() => {
+        if (user) {
+            console.log('User metadata:', user.user_metadata);
+            // Use username from user metadata
+            const username = user.user_metadata?.username || user.user_metadata?.name || user.email;
+            setAddedBy(username);
+            
+            // Also fetch profile for additional data if needed
+            fetchUserProfile();
+        }
+    }, [user]);
+
+    // Fetch user profile from the database
+    const fetchUserProfile = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (error) {
+                console.error('Error fetching user profile:', error);
+                // We already set addedBy from metadata, so no fallback needed here
+            } else if (data) {
+                setUserProfile(data);
+                // If profile has a name, prefer it over metadata
+                if (data.name) {
+                    setAddedBy(data.name);
+                }
+            }
+        } catch (err) {
+            console.error('Exception fetching user profile:', err);
+            // We already set addedBy from metadata, so no fallback needed here
+        }
+    };
 
     // Check if we're in edit mode and fetch the movie data if needed
     useEffect(() => {
@@ -102,16 +144,21 @@ function AddMovie() {
                 ? '/.netlify/functions/update-movie' 
                 : '/.netlify/functions/add-movie';
                 
+            // Get the username from user metadata
+            const username = user ? (user.user_metadata?.username || user.user_metadata?.name || user.email) : addedBy;
+                
             const movieData = {
                 title,
                 description,
-                addedBy,
+                addedBy: user ? user.id : addedBy, // Use authenticated user ID if available
                 poster,
                 year,
                 director,
                 genre,
                 imdbRating,
-                sessionId
+                sessionId,
+                authToken: user ? user.access_token : null, // Include auth token if user is authenticated
+                displayName: username // Use username from metadata
             };
             
             // If editing, include the movie ID
@@ -228,11 +275,17 @@ function AddMovie() {
                             <label>Added By:</label>
                             <input
                                 type="text"
-                                value={addedBy}
+                                value={user ? (user.user_metadata?.username || user.user_metadata?.name || user.email) : addedBy}
                                 onChange={(e) => setAddedBy(e.target.value)}
                                 required
                                 className="form-input"
+                                disabled={!!user} // Disable the field if user is authenticated
                             />
+                            {user && (
+                                <small className="form-text text-muted">
+                                    Using your account information
+                                </small>
+                            )}
                         </div>
                         <div className="form-group">
                             <label>Poster URL:</label>

@@ -36,6 +36,7 @@ const extractDateString = (dateObj) => {
  */
 const getSessions = async () => {
   try {
+    // Get all sessions
     const { data, error } = await supabase
       .from('sessions')
       .select('*')
@@ -63,6 +64,45 @@ const getSessions = async () => {
       };
     }).filter(Boolean); // Remove any null entries
     
+    console.log('Sessions before fetching host data:', sessions);
+    
+    // For each session, try to get the host's username
+    for (const session of sessions) {
+      try {
+        // Use our Netlify function to get user data
+        const url = `/.netlify/functions/get-user?userId=${session.hostId}`;
+        console.log('Fetching host data from:', url);
+        
+        const response = await fetch(url);
+        console.log('Host data response status:', response.status);
+        
+        if (response.ok) {
+          const responseText = await response.text();
+          console.log('Host data response text:', responseText);
+          
+          try {
+            const data = JSON.parse(responseText);
+            console.log('Parsed host data:', data);
+            
+            if (data.user && data.user.username) {
+              session.hostUsername = data.user.username;
+              console.log('Set hostUsername to:', session.hostUsername);
+            } else {
+              console.log('No username found in response data:', data);
+            }
+          } catch (parseError) {
+            console.error('Error parsing host data JSON:', parseError);
+          }
+        } else {
+          console.error('Error response from get-user:', response.status);
+        }
+      } catch (err) {
+        console.error('Error fetching host data for session:', session.id, err);
+        // Continue without host username
+      }
+    }
+    
+    console.log('Final sessions with host data:', sessions);
     return sessions;
   } catch (error) {
     console.error('Error getting sessions:', error);
@@ -87,7 +127,7 @@ const getSessionById = async (id) => {
       throw error;
     }
     
-    return {
+    const session = {
       id: data.id,
       sessionName: data.name || null,
       startDate: extractDateString(data.start_date),
@@ -96,6 +136,45 @@ const getSessionById = async (id) => {
       hostId: data.host_id || 'unknown',
       winningMovie: data.winning_movie || null
     };
+    
+    console.log('Session before fetching host data:', session);
+    
+    // Try to get the host's username
+    try {
+      // Use our Netlify function to get user data
+      const url = `/.netlify/functions/get-user?userId=${session.hostId}`;
+      console.log('Fetching host data from:', url);
+      
+      const response = await fetch(url);
+      console.log('Host data response status:', response.status);
+      
+      if (response.ok) {
+        const responseText = await response.text();
+        console.log('Host data response text:', responseText);
+        
+        try {
+          const data = JSON.parse(responseText);
+          console.log('Parsed host data:', data);
+          
+          if (data.user && data.user.username) {
+            session.hostUsername = data.user.username;
+            console.log('Set hostUsername to:', session.hostUsername);
+          } else {
+            console.log('No username found in response data:', data);
+          }
+        } catch (parseError) {
+          console.error('Error parsing host data JSON:', parseError);
+        }
+      } else {
+        console.error('Error response from get-user:', response.status);
+      }
+    } catch (err) {
+      console.error('Error fetching host data for session:', session.id, err);
+      // Continue without host username
+    }
+    
+    console.log('Final session with host data:', session);
+    return session;
   } catch (error) {
     console.error('Error getting session by ID:', error);
     throw new Error(`Failed to get session: ${error.message}`);

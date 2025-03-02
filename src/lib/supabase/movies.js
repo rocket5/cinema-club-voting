@@ -35,7 +35,8 @@ const getMovies = async (sessionId = null) => {
       year: movie.year || null,
       director: movie.director || null,
       genre: movie.genre || null,
-      imdbRating: movie.imdb_rating || null
+      imdbRating: movie.imdb_rating || null,
+      displayName: movie.display_name || null
     }));
   } catch (error) {
     console.error('Error getting movies:', error);
@@ -73,7 +74,8 @@ const getMovieById = async (id) => {
       year: data.year || null,
       director: data.director || null,
       genre: data.genre || null,
-      imdbRating: data.imdb_rating || null
+      imdbRating: data.imdb_rating || null,
+      displayName: data.display_name || null
     };
   } catch (error) {
     console.error('Error getting movie by ID:', error);
@@ -106,7 +108,8 @@ const createMovie = async (movieData) => {
       year: movieData.year || null,
       director: movieData.director || null,
       genre: movieData.genre || null,
-      imdb_rating: movieData.imdbRating || null
+      imdb_rating: movieData.imdbRating || null,
+      display_name: movieData.displayName || null
     };
     
     const { data: result, error } = await supabase
@@ -132,7 +135,8 @@ const createMovie = async (movieData) => {
       year: result.year || null,
       director: result.director || null,
       genre: result.genre || null,
-      imdbRating: result.imdb_rating || null
+      imdbRating: result.imdb_rating || null,
+      displayName: result.display_name || null
     };
   } catch (error) {
     console.error('Error creating movie:', error);
@@ -164,6 +168,7 @@ const updateMovie = async (id, movieData) => {
     if (movieData.director !== undefined) data.director = movieData.director;
     if (movieData.genre !== undefined) data.genre = movieData.genre;
     if (movieData.imdbRating !== undefined) data.imdb_rating = movieData.imdbRating;
+    if (movieData.displayName !== undefined) data.display_name = movieData.displayName;
     
     // Add updated timestamp
     data.updated_at = new Date().toISOString();
@@ -192,7 +197,8 @@ const updateMovie = async (id, movieData) => {
       year: result.year || null,
       director: result.director || null,
       genre: result.genre || null,
-      imdbRating: result.imdb_rating || null
+      imdbRating: result.imdb_rating || null,
+      displayName: result.display_name || null
     };
   } catch (error) {
     console.error('Error updating movie:', error);
