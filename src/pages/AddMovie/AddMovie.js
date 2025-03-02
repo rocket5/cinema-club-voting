@@ -31,6 +31,7 @@ function AddMovie() {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [sessionName, setSessionName] = useState(''); // Add state for session name
 
     // Set user information when user is available
     useEffect(() => {
@@ -44,6 +45,29 @@ function AddMovie() {
             fetchUserProfile();
         }
     }, [user]);
+
+    // Fetch session data when component mounts
+    useEffect(() => {
+        if (sessionId) {
+            fetchSessionData();
+        }
+    }, [sessionId]);
+
+    // Fetch session data from the server
+    const fetchSessionData = async () => {
+        try {
+            const response = await fetch(`/.netlify/functions/get-session?sessionId=${sessionId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('Received session data:', data);
+            setSessionName(data.sessionName || '');
+        } catch (err) {
+            console.error('Error fetching session data:', err);
+            // Don't set error here as we can still proceed with adding a movie
+        }
+    };
 
     // Fetch user profile from the database
     const fetchUserProfile = async () => {
@@ -461,12 +485,15 @@ function AddMovie() {
 
     return (
         <div className="add-movie-container">
-            <h1 className="page-title">{isEditing ? 'Edit Movie' : 'Add New Movie'}</h1>
+            <h1 className="page-title">
+                {isEditing ? 'Edit Movie' : 'Add A New Movie'}
+                {sessionName && <span className="session-subtitle"> {sessionName}</span>}
+            </h1>
             
             {viewMode === 'search' && !isEditing && (
                 <div className="search-section">
                     <p className="search-instructions">
-                        <FaSearch className="instruction-icon" /> Search for a movie using the OMDb API or <button onClick={handleManualEntry} className="btn-text"><FaKeyboard className="btn-text-icon" /> enter details manually</button>
+                        <FaSearch className="instruction-icon" /> Search for a movie or <button onClick={handleManualEntry} className="btn-text"><FaKeyboard className="btn-text-icon" /> enter details manually</button>
                     </p>
                     <MovieSearch onSelectMovie={handleSelectMovie} />
                 </div>

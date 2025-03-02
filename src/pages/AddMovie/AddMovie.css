@@ -16,14 +16,12 @@
   position: relative;
 }
 
-.page-title:after {
-  content: '';
+.session-subtitle {
+  font-size: 2rem;
+  font-weight: 400;
+  color: #3498db;
   display: block;
-  width: 60px;
-  height: 4px;
-  background: linear-gradient(90deg, #3498db, #2980b9);
-  margin: 0.5rem auto 0;
-  border-radius: 2px;
+  margin-top: 0.5rem;
 }
 
 /* Search section */
@@ -309,6 +307,10 @@ textarea.form-input {
     font-size: 1.8rem;
   }
   
+  .session-subtitle {
+    font-size: 1rem;
+  }
+  
   .search-section,
   .details-section,
   .form-section {
@@ -345,6 +347,10 @@ textarea.form-input {
 @media (max-width: 480px) {
   .page-title {
     font-size: 1.5rem;
+  }
+  
+  .session-subtitle {
+    font-size: 0.9rem;
   }
   
   .search-section,
