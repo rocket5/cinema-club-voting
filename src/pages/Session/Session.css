@@ -58,6 +58,76 @@
     margin-right: 0.5rem;
 }
 
+/* Voting Controls */
+.voting-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.submit-vote-btn {
+    background-color: #28a745;
+    border-color: #28a745;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
+}
+
+.submit-vote-btn:hover:not(.disabled) {
+    background-color: #218838;
+    border-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(40, 167, 69, 0.25);
+}
+
+.submit-vote-btn.disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.sort-btn, .results-btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.sort-btn:hover, .results-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.results-btn {
+    background-color: #f8f9fa;
+    border-color: #17a2b8;
+    color: #17a2b8;
+}
+
+.results-btn:hover {
+    background-color: #e2f3f7;
+}
+
+.voting-hint {
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.vote-submitted-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #28a745;
+    font-weight: 500;
+}
+
+.vote-submitted-message i {
+    font-size: 1.25rem;
+}
+
 .error-container {
     padding: 2rem;
     text-align: center;
@@ -114,4 +184,35 @@
     .session-meta {
         font-size: 0.9rem;
     }
+    
+    .voting-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 1rem;
+        width: 100%;
+    }
+    
+    .submit-vote-btn, .sort-btn, .results-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+.debug-toggle {
+    padding: 0;
+    margin-left: 8px;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.debug-toggle:hover {
+    opacity: 1;
+}
+
+.debug-section {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
 } 

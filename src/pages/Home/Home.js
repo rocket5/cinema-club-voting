@@ -19,6 +19,7 @@ function Home() {
     const [showModal, setShowModal] = useState(false);
     const [sessionName, setSessionName] = useState('');
     const [nameError, setNameError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     // Fetch sessions in both Host and Vote mode
     useEffect(() => {
@@ -62,42 +63,67 @@ function Home() {
         }
     };
 
-    const createSession = async () => {
+    const handleCreateSession = async () => {
+        if (!sessionName.trim()) {
+            setNameError('Please enter a session name');
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+        setErrorDetails('');
+
         try {
-            setNameError('');
+            console.log('Starting session creation process...');
             
-            if (!sessionName.trim()) {
-                setNameError('Session name is required');
-                return;
-            }
-
-            // Check if user is authenticated
-            if (!user) {
-                setError('You must be logged in to create a session');
-                return;
-            }
-
             // Get the current session to extract the auth token
             const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
             
-            if (sessionError || !sessionData?.session?.access_token) {
-                console.error('Error getting auth token:', sessionError);
+            if (sessionError) {
+                console.error('Error getting auth session:', sessionError);
                 setError('Authentication error. Please try logging in again.');
+                setErrorDetails(sessionError?.message || 'Failed to get auth session');
+                setIsLoading(false);
+                return;
+            }
+            
+            if (!sessionData?.session?.access_token) {
+                console.error('No access token available in session:', sessionData);
+                setError('Authentication token missing. Please try logging in again.');
+                setErrorDetails('No access token available in current session');
+                setIsLoading(false);
                 return;
             }
 
             const authToken = sessionData.session.access_token;
-            console.log('Creating new session...');
+            const userId = user?.id;
+            
+            if (!userId) {
+                console.error('User ID is missing');
+                setError('User information missing. Please try logging in again.');
+                setErrorDetails('Cannot identify current user');
+                setIsLoading(false);
+                return;
+            }
+            
+            console.log('Creating new session with auth token and user ID:', { 
+                hasAuthToken: !!authToken, 
+                authTokenLength: authToken.length,
+                tokenPrefix: authToken.substring(0, 10) + '...',
+                hasUserId: !!userId,
+                sessionName 
+            });
             
             const response = await fetch('/.netlify/functions/create-session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify({
                     sessionName: sessionName,
-                    createdBy: user.id, // Use the actual user ID
-                    authToken: authToken // Pass the auth token
+                    createdBy: userId,
+                    authToken: authToken
                 })
             });
             
@@ -106,8 +132,11 @@ function Home() {
             console.log('Session creation response:', data);
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to create session');
+                console.error('Session creation failed:', data);
+                throw new Error(data.error || data.message || 'Failed to create session');
             }
+
+            console.log('Session created successfully:', data);
 
             // Close the modal and refresh sessions
             setSessionName('');
@@ -117,11 +146,15 @@ function Home() {
             // Navigate to the new session
             if (data.sessionId) {
                 navigate(`/session/${data.sessionId}`);
+            } else {
+                console.warn('No session ID returned, cannot navigate to new session');
             }
         } catch (err) {
             console.error('Error creating session:', err);
             setError('Failed to create session');
-            setErrorDetails(err.message);
+            setErrorDetails(err.message || 'Unknown error occurred');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -183,7 +216,7 @@ function Home() {
                             <button onClick={handleCloseModal} className="cancel-btn">
                                 Cancel
                             </button>
-                            <button onClick={createSession} className="create-btn">
+                            <button onClick={handleCreateSession} className="create-btn">
                                 Create
                             </button>
                         </div>

@@ -26,7 +26,10 @@
     "test:login": "jest --testPathPattern=src/tests/integration/login.test.js",
     "test:supabase": "jest --testPathPattern=src/tests/supabase",
     "eject": "react-scripts eject",
-    "dev": "netlify dev"
+    "dev": "netlify dev",
+    "test:voting": "node src/tests/voting.test.js",
+    "verify:env": "node src/tests/verify-env.js",
+    "test:voting:full": "npm run verify:env && npm run test:voting"
   },
   "eslintConfig": {
     "extends": [

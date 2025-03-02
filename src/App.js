@@ -13,83 +13,86 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import ProtectedHostRoute from './routes/ProtectedHostRoute';
 import { AppModeProvider } from './context/AppModeContext';
 import { AuthProvider } from './context/AuthContext';
+import { VotingProvider } from './context/VotingContext';
 import './App.css';
 
 function App() {
   return (
     <AuthProvider>
       <AppModeProvider>
-        <Router>
-          <div className="app">
-            <Navbar />
-            <main>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/email-confirmation" element={<EmailConfirmation />} />
-                
-                {/* Protected routes */}
-                <Route 
-                  path="/profile" 
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/session/:sessionId" 
-                  element={
-                    <ProtectedRoute>
-                      <Session />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/session/:sessionId/add" 
-                  element={
-                    <ProtectedRoute>
-                      <AddMovie />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/session/:sessionId/edit/:movieId" 
-                  element={
-                    <ProtectedRoute>
-                      <AddMovie />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/" 
-                  element={
-                    <ProtectedRoute>
-                      <Home />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/add" 
-                  element={
-                    <ProtectedHostRoute>
-                      <AddMovie />
-                    </ProtectedHostRoute>
-                  } 
-                />
-                <Route 
-                  path="/movie/:id" 
-                  element={
-                    <ProtectedRoute>
-                      <MovieDetail />
-                    </ProtectedRoute>
-                  } 
-                />
-              </Routes>
-            </main>
-          </div>
-        </Router>
+        <VotingProvider>
+          <Router>
+            <div className="app">
+              <Navbar />
+              <main>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/email-confirmation" element={<EmailConfirmation />} />
+                  
+                  {/* Protected routes */}
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/session/:sessionId" 
+                    element={
+                      <ProtectedRoute>
+                        <Session />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/session/:sessionId/add" 
+                    element={
+                      <ProtectedRoute>
+                        <AddMovie />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/session/:sessionId/edit/:movieId" 
+                    element={
+                      <ProtectedRoute>
+                        <AddMovie />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/" 
+                    element={
+                      <ProtectedRoute>
+                        <Home />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/add" 
+                    element={
+                      <ProtectedHostRoute>
+                        <AddMovie />
+                      </ProtectedHostRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/movie/:id" 
+                    element={
+                      <ProtectedRoute>
+                        <MovieDetail />
+                      </ProtectedRoute>
+                    } 
+                  />
+                </Routes>
+              </main>
+            </div>
+          </Router>
+        </VotingProvider>
       </AppModeProvider>
     </AuthProvider>
   );

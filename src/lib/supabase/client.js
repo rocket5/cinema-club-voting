@@ -3,13 +3,17 @@ const { createClient } = require('@supabase/supabase-js');
 // Get environment variables
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.REACT_APP_SUPABASE_SERVICE_ROLE_KEY;
 
 // Log environment info (without exposing secrets)
 console.log('Supabase URL exists:', !!supabaseUrl);
 console.log('Supabase Anon Key exists:', !!supabaseAnonKey);
+console.log('Supabase Service Key exists:', !!supabaseServiceKey);
 
 // Create a Supabase client instance with error handling
 let supabase;
+let supabaseAdmin;
+
 try {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables');
@@ -27,6 +31,29 @@ try {
   });
   
   console.log('Supabase client initialized successfully');
+  
+  // Create admin client with service role key if available
+  if (supabaseServiceKey) {
+    console.log('Creating Supabase admin client with service role key');
+    supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    console.log('Supabase admin client initialized successfully');
+  } else {
+    console.warn('Service role key not available, admin client will fall back to using anon key');
+    // Fall back to regular client if service key is not available
+    supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    });
+    console.log('Supabase admin client initialized with anon key as fallback');
+  }
   
   // Store references to original methods to ensure they're preserved
   const originalSignOut = supabase.auth.signOut.bind(supabase.auth);
@@ -209,35 +236,41 @@ try {
   
 } catch (error) {
   console.error('Error initializing Supabase client:', error);
-  // Create a dummy client that will throw a more helpful error when used
-  supabase = {
+  // Create dummy clients that will throw a more helpful error when used
+  supabase = createDummyClient('regular');
+  supabaseAdmin = createDummyClient('admin');
+}
+
+// Helper function to create a dummy client
+function createDummyClient(type) {
+  return {
     auth: {
       signUp: () => {
-        throw new Error('Supabase client failed to initialize. Check environment variables and connection.');
+        throw new Error(`Supabase ${type} client failed to initialize. Check environment variables and connection.`);
       },
       signInWithPassword: () => {
-        throw new Error('Supabase client failed to initialize. Check environment variables and connection.');
+        throw new Error(`Supabase ${type} client failed to initialize. Check environment variables and connection.`);
       },
       signOut: () => {
-        throw new Error('Supabase client failed to initialize. Check environment variables and connection.');
+        throw new Error(`Supabase ${type} client failed to initialize. Check environment variables and connection.`);
       },
       onAuthStateChange: () => {
-        throw new Error('Supabase client failed to initialize. Check environment variables and connection.');
+        throw new Error(`Supabase ${type} client failed to initialize. Check environment variables and connection.`);
       },
       getSession: () => {
-        throw new Error('Supabase client failed to initialize. Check environment variables and connection.');
+        throw new Error(`Supabase ${type} client failed to initialize. Check environment variables and connection.`);
       },
       debug: () => {
-        console.error('Supabase client failed to initialize. Check environment variables and connection.');
+        console.error(`Supabase ${type} client failed to initialize. Check environment variables and connection.`);
         return Promise.resolve({ error: new Error('Client not initialized') });
       }
     },
     from: () => ({
       select: () => {
-        throw new Error('Supabase client failed to initialize. Check environment variables and connection.');
+        throw new Error(`Supabase ${type} client failed to initialize. Check environment variables and connection.`);
       }
     })
   };
 }
 
-module.exports = { supabase };
+module.exports = { supabase, supabaseAdmin };

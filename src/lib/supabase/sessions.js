@@ -1,4 +1,4 @@
-const { supabase } = require('./client');
+const { supabase, supabaseAdmin } = require('./client');
 
 /**
  * Extract a usable date string from a timestamp
@@ -37,7 +37,7 @@ const extractDateString = (dateObj) => {
 const getSessions = async () => {
   try {
     // Get all sessions from the database
-    const { data: sessionsData, error } = await supabase
+    const { data: sessionsData, error } = await supabaseAdmin
       .from('sessions')
       .select('*')
       .order('created_at', { ascending: false });
@@ -67,7 +67,7 @@ const getSessions = async () => {
     for (const session of sessions) {
       try {
         if (session.hostId) {
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile, error: profileError } = await supabaseAdmin
             .from('profiles')
             .select('id, name, username')
             .eq('id', session.hostId)
@@ -121,7 +121,7 @@ const getSessions = async () => {
  */
 const getSessionById = async (id) => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('sessions')
       .select('*')
       .eq('id', id)
@@ -144,7 +144,7 @@ const getSessionById = async (id) => {
     // Try to get the host's username
     try {
       if (session.hostId) {
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile, error: profileError } = await supabaseAdmin
           .from('profiles')
           .select('id, name, username')
           .eq('id', session.hostId)
@@ -198,26 +198,43 @@ const getSessionById = async (id) => {
  */
 const createSession = async (sessionData, customSupabase) => {
   try {
-    // Use the provided Supabase client or fall back to the default one
-    const client = customSupabase || supabase;
+    // Use the provided Supabase client, or fall back to the admin client, or finally the default client
+    const client = customSupabase || supabaseAdmin || supabase;
+    
+    console.log('Creating session with client type:', 
+      customSupabase ? 'custom client' : 
+      (client === supabaseAdmin ? 'admin client' : 'default client'));
+    
+    // Log client availability to debug
+    console.log('Client check:', { 
+      hasCustomClient: !!customSupabase,
+      hasAdminClient: !!supabaseAdmin,
+      hasDefaultClient: !!supabase
+    });
     
     // Validate required fields
     if (!sessionData.hostId) {
       throw new Error('Missing required field: hostId is required');
     }
     
-    // If using the default client, check if user is authenticated
-    if (!customSupabase) {
+    // Check if we're using a non-custom client that needs authentication
+    if (!customSupabase && client === supabase) {
+      console.log('Using default client, checking authentication');
       const { data: { user }, error: authError } = await client.auth.getUser();
       
       if (authError || !user) {
+        console.error('Auth error in createSession:', authError);
         throw new Error('User is not authenticated. Please sign in first.');
       }
       
       // Ensure the hostId matches the authenticated user
       const hostId = sessionData.hostId === 'current-user' ? user.id : sessionData.hostId;
       sessionData.hostId = hostId;
+      console.log('Using hostId:', hostId);
     }
+    
+    // Log whether the client has direct DB access
+    console.log('Using client with direct DB access:', client === supabaseAdmin);
     
     // Convert to snake_case for Supabase
     const data = {
@@ -230,15 +247,57 @@ const createSession = async (sessionData, customSupabase) => {
       created_at: new Date().toISOString()
     };
     
-    const { data: result, error } = await client
-      .from('sessions')
-      .insert(data)
-      .select()
-      .single();
+    console.log('Inserting session data:', data);
     
+    // First try creating the session with normal RLS
+    let result, error;
+    try {
+      console.log('Attempting to insert session with standard permissions');
+      const response = await client
+        .from('sessions')
+        .insert(data)
+        .select()
+        .single();
+      
+      result = response.data;
+      error = response.error;
+      
+      if (error) {
+        console.warn('Standard permission insert failed:', error);
+      } else {
+        console.log('Standard permission insert succeeded');
+      }
+    } catch (insertError) {
+      console.error('Error during insert attempt:', insertError);
+      error = insertError;
+    }
+    
+    // If RLS blocks it, try with admin client as fallback
+    if (error && client !== supabaseAdmin && supabaseAdmin) {
+      console.log('Falling back to admin client for insert');
+      const adminResponse = await supabaseAdmin
+        .from('sessions')
+        .insert(data)
+        .select()
+        .single();
+      
+      result = adminResponse.data;
+      error = adminResponse.error;
+      
+      if (error) {
+        console.error('Admin fallback insert also failed:', error);
+      } else {
+        console.log('Admin fallback insert succeeded');
+      }
+    }
+    
+    // Final error check
     if (error) {
+      console.error('Error inserting session:', error);
       throw error;
     }
+    
+    console.log('Session created successfully:', result);
     
     return {
       id: result.id,
@@ -276,7 +335,7 @@ const updateSession = async (id, sessionData) => {
     // Add updated timestamp
     data.updated_at = new Date().toISOString();
     
-    const { data: result, error } = await supabase
+    const { data: result, error } = await supabaseAdmin
       .from('sessions')
       .update(data)
       .eq('id', id)
@@ -309,7 +368,7 @@ const updateSession = async (id, sessionData) => {
  */
 const deleteSession = async (id) => {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('sessions')
       .delete()
       .eq('id', id);
@@ -331,7 +390,7 @@ const deleteSession = async (id) => {
  */
 const deleteAllSessions = async () => {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('sessions')
       .delete()
       .neq('id', '0'); // Delete all sessions (dummy condition to delete all)

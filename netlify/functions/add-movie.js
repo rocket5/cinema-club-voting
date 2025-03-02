@@ -158,6 +158,32 @@ exports.handler = async (event, context) => {
         
         console.log('Movie created successfully:', result);
 
+        // Now create the relationship in session_movies table
+        try {
+            console.log('Creating session_movies relationship...');
+            const sessionMovieData = {
+                session_id: sessionId,
+                movie_id: result.id
+            };
+            
+            const { data: relationResult, error: relationError } = await supabase
+                .from('session_movies')
+                .insert(sessionMovieData);
+                
+            if (relationError) {
+                console.warn('Error creating session_movies relationship:', relationError);
+                console.log('Continuing anyway since the movie was created successfully');
+                // Don't throw the error, as we've already created the movie
+                // and the session_id is stored on the movie record
+            } else {
+                console.log('Session_movies relationship created successfully');
+            }
+        } catch (relationException) {
+            console.warn('Exception creating session_movies relationship:', relationException);
+            console.log('Continuing anyway since the movie was created successfully');
+            // Don't throw the exception, as we've already created the movie
+        }
+
         return {
             statusCode: 200,
             body: JSON.stringify({
